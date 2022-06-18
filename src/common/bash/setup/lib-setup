@@ -40,6 +40,13 @@ if assert-system has-command snap; then
     done < $LIB_SRC_ROOT/linux/resources/packages-snap-classic
 fi
 
+if assert-system has-command flatpak; then
+    compose h2 "Installing Flatpak Packages"
+    while read in; do 
+        flatpak install $in || exit $EXIT_UNEXPECTED
+    done < $LIB_SRC_ROOT/linux/resources/packages-flatpak
+fi
+
 compose hr
 compose h1 "Configuring"
 
