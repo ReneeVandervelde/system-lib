@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+case "$1" in
+    "help" | "--help" | "-h" | "")
+        compose body "Setup encryption on a specified drive";
+        compose warn "This will FORMAT the drive, erasing its contents!"
+        compose body "Usage: encrypt-drive [drive] ([mount-target])";
+        compose body "    [drive] - The partition path to encrypt (eg. /dev/sda1)"
+        compose body "    [mount-target] - A mount-point to initialize the drive on after complete (eg. /media/example) (optional)"
+        exit 0;
+    ;;
+esac
+
+DRIVE=$1;
+
+if [ "$DRIVE" == "" ]; then
+    compose error "Drive argument required (eg. /dev/sda1)"
+    exit $EXIT_ILLEGAL_ARG;
+fi
+
+compose h1 "Encrypting $DRIVE"
+
+# Encrypt the partition
+sudo cryptsetup luksFormat $DRIVE
+
+# Unlock Partition
+sudo udisksctl unlock -b $DRIVE
+
+read -p "DM ID (eg. /dev/dm-1): " DM
+
+if [ "$DM" == "" ]; then
+    compose error "DM argument required"
+    exit $EXIT_ILLEGAL_ARG;
+fi
+
+# Format the encrypted partition via diskmapper
+sudo mkfs.ext4 $DM
+
+TARGET=$2
+if [ "$TARGET" != "" ]; then
+    sudo mkdir -p $TARGET
+    sudo mount $DM $TARGET
+fi

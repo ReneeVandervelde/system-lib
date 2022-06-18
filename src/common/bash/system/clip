@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+if assert-system os linux; then
+    xclip -selection clipboard
+elif assert-system os macos; then
+    pbcopy
+else
+    compose error "Unsupported OS"
+    exit $EXIT_ILLEGAL_STATE
+fi

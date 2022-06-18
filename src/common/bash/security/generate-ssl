@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+# Generates a self-signed cert for a domain that can be added to your
+# Local trusted certs and be recognized by browsers.
+
+DOMAIN=$1
+if [ -z "$DOMAIN" ]; then
+    read -p "Domain: " DOMAIN
+fi
+
+read -p "Country Name (2 letter code): " COUNTRY
+read -p "State or Province Name (full name): " STATE
+read -p "Locality Name (eg, city): " CITY
+read -p "Organization Name (eg, company): " ORG
+read -p "Organizational Unit Name (eg, section): " ORGUNIT
+
+CONFIG="
+[req]
+distinguished_name = req_distinguished_name
+x509_extensions = v3_req
+prompt = no
+[req_distinguished_name]
+C = $COUNTRY
+ST = $STATE
+L = $CITY
+O = $ORG
+OU = $ORGUNIT
+CN = $DOMAIN
+[v3_req]
+keyUsage = critical, digitalSignature, keyAgreement
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = $DOMAIN
+"
+
+echo "$CONFIG" > $DOMAIN.cnf
+openssl req -x509 -nodes -days 730 -newkey rsa:2048 -keyout $DOMAIN.key -out $DOMAIN.crt -config $DOMAIN.cnf -sha256

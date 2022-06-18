@@ -1,0 +1,16 @@
+#!/bin/bash
+
+DEVICE=$1
+shift
+
+case "$DEVICE" in 
+    "op8")
+        ANDROID_SERIAL=adb-ae3013f7-U9BPPx._adb-tls-connect._tcp. "$@"
+        ;;
+    "carpenter")
+        ANDROID_SERIAL=0A241JEC218580 "$@"
+        ;;
+    *)
+        >&2 echo "No device configured <$1>. Using directly."
+        ANDROID_SERIAL=$1 "$@"
+esac

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+"$@"
+result=$?
+
+if [[ $result == 0 ]]; then
+    osascript -e "display notification \"Command Finished\" with title \"$1\" sound name \"default\""
+else
+    osascript -e "display notification \"Command Failed\" with title \"$1\" sound name \"basso\""
+fi
+
+exit $result

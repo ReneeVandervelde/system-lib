@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+compose h1 "Running System Updates"
+
+if assert-system has-command softwareupdate; then
+    compose h2 "OS Native Software"
+    softwareupdate -i -a || exit $EXIT_UNEXPECTED
+fi
+
+if assert-system has-command dnf; then
+    compose h2 "Updating DNF"
+    sudo dnf update || exit $EXIT_UNEXPECTED
+fi
+
+if assert-system has-command brew; then
+    compose h2 "Updating HomeBrew"
+    brew update && brew upgrade && brew cleanup || exit $EXIT_UNEXPECTED
+fi
+
+if assert-system has-command npm && assert-system has-command node; then
+    compose h2 "Updating NPM"
+    sudo npm install npm -g && sudo npm update -g || exit $EXIT_UNEXPECTED
+fi
+
+if assert-system has-command snap; then
+    compose h2 "Updating Snap"
+    sudo snap refresh || exit $EXIT_UNEXPECTED
+fi
+
+if assert-system has-command flatpak; then
+    compose h2 "Updating Flatpak"
+    flatpak update -y || exit $EXIT_UNEXPECTED
+fi
+
+compose hr
+compose success "All Updates Complete"

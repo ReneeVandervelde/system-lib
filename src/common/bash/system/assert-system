@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+function __os {
+    case "$1" in
+        "linux")
+            if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+                exit 0;
+            else
+                exit 1;
+            fi
+            ;;
+        "rhel")
+            if [[ "$OSTYPE" == "linux-gnu"* ]] && [[ -f "/etc/redhat-release" ]]; then
+                exit 0;
+            else
+                exit 1;
+            fi
+            ;;
+        "macos")
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                exit 0;
+            else
+                exit 1;
+            fi
+            ;;
+        *)
+            compose error "Illegal OS type: $1"
+            exit $EXIT_ILLEGAL_ARG;
+    esac
+}
+
+COMMAND=$1
+shift
+
+case "$COMMAND" in
+    "os")
+        __os "$@"
+        ;;
+    "has-command")
+        command -v ${1} &> /dev/null
+        ;;
+    *)
+        compose body "Assert information about the system."
+        compose body "Usage: assert-system <command> [<args>]"
+        compose h1 "Commands:"
+        compose li "has-command [command]"
+        compose li "help"
+        compose li "os [linux|rhel|macos]"
+
+        if [[ $COMMAND == "help" ]]; then 
+            exit 0
+        else 
+            exit $EXIT_ILLEGAL_ARG;
+        fi 
+esac;

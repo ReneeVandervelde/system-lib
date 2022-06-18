@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+compose h1 "Garbage collector";
+compose hr;
+
+compose h2 "Removing Downloads older than 3 days";
+find ~/Downloads/* -ctime +3 -print0 | xargs -0 trash;
+compose hr;
+
+text h2 "Removing Desktop Junk";
+find ~/Desktop/* -print0 | xargs -0 trash;
+compose hr;

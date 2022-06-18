@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+SEARCH_DIR="$HOME/Applications";
+SYNC_EXISTING_FILE_TRACKER="$HOME/.sync-appimages";
+SYNC_NEW_FILE_TRACKER="/tmp/.sync-apps-$RANDOM";
+
+function createShortcut {
+    local tmpDir="/tmp/sync-apps-$RANDOM";
+    mkdir $tmpDir;
+    cd $tmpDir;
+
+    local imageName=$(basename $1);
+    cp $1 .;
+
+    $imageName --appimage-extract;
+
+    local desktopFile=$(ls squashfs-root/*.desktop | head -1);
+    if [ ! -f "$desktopFile" ]; then
+        echo -e "\\033[31mError: No Appimage desktop file found\\033[0m" 1>&2;
+        exit 1;
+    fi
+
+    local icon=$(sed -rn 's/^Icon=([^\n]+)$/\1/p' $desktopFile);
+    sed -ir "s~Exec=.*~Exec=$1~" $desktopFile;
+
+    if [ -f "squashfs-root/$icon.png" ]; then
+        cp squashfs-root/$icon.png $HOME/.local/share/icons/;
+        echo "Created: $HOME/.local/share/icons/$icon.png";
+    else
+        echo -e "\\033[31mError: No Appimage icon at $icon.png\\033[0m" 1>&2;
+    fi
+
+    cp $desktopFile $HOME/.local/share/applications/;
+    echo "Created: $HOME/.local/share/applications/$(basename $desktopFile)";
+
+    echo $1 >> $SYNC_NEW_FILE_TRACKER;
+
+    cd -;
+    rm -rf $tmpDir;
+}
+
+function removeDesktopFiles {
+    local icon=$(sed -rn 's/^Icon=([^\n]+)$/\1/p' $1);
+    local iconFile="$HOME/.local/share/icons/$icon.png";
+
+
+    if [ -f "$iconFile" ]; then
+        rm -f "$iconFile";
+        echo "Removed: $iconFile";
+    fi
+    rm -f "$1";
+    echo "Removed: $1";
+}
+
+function removeIfOrphaned {
+    if [ -z $(grep "$1" "$SYNC_NEW_FILE_TRACKER") ]; then 
+        echo "Cleaning up orphaned: $1";
+        grep -lr "$1" ~/.local/share/applications/*.desktop | while read desktopFile; do removeDesktopFiles "$desktopFile"; done;
+        
+    fi
+}
+
+find $SEARCH_DIR -iname "*.appimage" | while read file; do createShortcut "$file"; done;
+touch $SYNC_EXISTING_FILE_TRACKER;
+touch $SYNC_NEW_FILE_TRACKER;
+cat $SYNC_EXISTING_FILE_TRACKER | while read file; do removeIfOrphaned "$file"; done 
+rm -f $SYNC_EXISTING_FILE_TRACKER;
+cp $SYNC_NEW_FILE_TRACKER $SYNC_EXISTING_FILE_TRACKER;
+rm -f $SYNC_NEW_FILE_TRACKER;

@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+echo "Merge files"
+mkdir tmp
+cp -R */* tmp/
+mkdir build
+mv tmp build/com
+
+# echo "Signing POM files"
+# find . -name "*.pom" -exec gpg -s --detach-sig --armor --default-key E24AF50FA0237AA7 {} \;
+# echo "Signing AAR files"
+# find . -name "*.aar" -exec gpg -s --detach-sig --armor --default-key E24AF50FA0237AA7 {} \;
+# echo "Signing JAR files"
+# find . -name "*.jar" -exec gpg -s --detach-sig --armor --default-key E24AF50FA0237AA7 {} \;
+# echo "Signing module files"
+# find . -name "*.module" -exec gpg -s --detach-sig --armor --default-key E24AF50FA0237AA7 {} \;
+# echo "Signing KLIB files"
+# find . -name "*.klib" -exec g pg -s --detach-sig --armor --default-key E24AF50FA0237AA7 {} \;
+
+# echo "Trashing XML files"
+# find . -name "*.xml" -exec trash {} \;
+# find . -name "*.xml.*" -exec trash {} \;
+
+# echo "Trashing System files"
+# find . -name ".DS_Store" -exec trash {} \;
+
+echo "Compressing Archives"
+find build -name "*.pom" -exec bash -c 'zip -vj build/$(basename $(dirname $0 | sed -e "s/\/[^\/]*$//")).zip "$(dirname $0)"/*' {} \;
+
+echo "Uploading Archives"
+find build -name "*.zip" -exec curl -X POST --upload-file {} -u maxvandervelde:hsopud_1ku0.wsvgikgqfinAs8pcJVScn -v https://oss.sonatype.org/service/local/staging/bundle_upload \;
+
+
