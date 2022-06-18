@@ -52,11 +52,6 @@ fi
 compose hr
 compose h1 "Configuring"
 
-if assert-system os rhel; then
-    compose step "Enabling resilio-sync"
-    systemctl --user enable resilio-sync || exit $EXIT_UNEXPECTED
-fi
-
 compose h2 "Linking configurations"
 if assert-system os macos; then 
     re-link $$LIB_SRC_ROOT/macos/resources/.hyper.js $HOME/.hyper.js || exit $EXIT_UNEXPECTED

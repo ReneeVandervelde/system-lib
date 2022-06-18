@@ -20,6 +20,14 @@ sudo firewall-cmd --permanent --add-port=3838/udp  || exit $EXIT_UNEXPECTED;
 sudo firewall-cmd --permanent --add-port=1900/udp  || exit $EXIT_UNEXPECTED;
 sudo firewall-cmd --permanent --add-port=5351/udp  || exit $EXIT_UNEXPECTED;
 sudo service firewalld restart || exit $EXIT_UNEXPECTED;
+
+if assert-system is-graphical; then
+    sudo systemctl --user enable resilio-sync.service || exit $EXIT_UNEXPECTED
+else
+    sudo systemctl enable resilio-sync.service || exit $EXIT_UNEXPECTED
+fi
+
+compose h2 "Starting Service"
+sudo systemctl start resilio-sync.service || exit $EXIT_UNEXPECTED
  
  compose success "Successfully installed Sync"
- 
