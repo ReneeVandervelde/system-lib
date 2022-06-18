@@ -29,22 +29,24 @@ if assert-system has-command dnf; then
     sudo dnf install $(cat "$LIB_SRC_ROOT/rhel/resources/packages-dnf" | tr '\r\n' ' ') || exit $EXIT_UNEXPECTED
 fi
 
-if assert-system has-command snap; then
-    compose h2 "Installing Snap Packages"
-    if [ ! -L /snap ]; then sudo ln -s /var/lib/snapd/snap /snap || exit $EXIT_UNEXPECTED; fi
-    while read in; do 
-        sudo snap install $in || exit $EXIT_UNEXPECTED
-    done < $LIB_SRC_ROOT/linux/resources/packages-snap
-    while read in; do 
-        sudo snap install --classic $in || exit $EXIT_UNEXPECTED
-    done < $LIB_SRC_ROOT/linux/resources/packages-snap-classic
-fi
+if assert-system is-graphical; then 
+    if assert-system has-command snap; then
+        compose h2 "Installing Snap Packages"
+        if [ ! -L /snap ]; then sudo ln -s /var/lib/snapd/snap /snap || exit $EXIT_UNEXPECTED; fi
+        while read in; do 
+            sudo snap install $in || exit $EXIT_UNEXPECTED
+        done < $LIB_SRC_ROOT/linux/resources/packages-snap
+        while read in; do 
+            sudo snap install --classic $in || exit $EXIT_UNEXPECTED
+        done < $LIB_SRC_ROOT/linux/resources/packages-snap-classic
+    fi
 
-if assert-system has-command flatpak; then
-    compose h2 "Installing Flatpak Packages"
-    while read in; do 
-        flatpak install $in || exit $EXIT_UNEXPECTED
-    done < $LIB_SRC_ROOT/linux/resources/packages-flatpak
+    if assert-system has-command flatpak; then
+        compose h2 "Installing Flatpak Packages"
+        while read in; do 
+            flatpak install $in || exit $EXIT_UNEXPECTED
+        done < $LIB_SRC_ROOT/linux/resources/packages-flatpak
+    fi
 fi
 
 compose hr
@@ -59,14 +61,14 @@ compose h2 "Linking configurations"
 if assert-system os macos; then 
     re-link $$LIB_SRC_ROOT/macos/resources/.hyper.js $HOME/.hyper.js || exit $EXIT_UNEXPECTED
 fi
-if assert-system os linux; then
+if assert-system os linux && assert-system is-graphical; then
     re-link $LIB_SRC_ROOT/linux/resources/.hyper.js $HOME/.hyper.js || exit $EXIT_UNEXPECTED
 fi
 re-link $LIB_SRC_ROOT/common/resources/gitconfig $HOME/.gitconfig || exit $EXIT_UNEXPECTED
 re-link $LIB_SRC_ROOT/common/resources/gitignore $HOME/.gitignore || exit $EXIT_UNEXPECTED
 re-link $LIB_SRC_ROOT/common/resources/inputrc $HOME/.inputrc || exit $EXIT_UNEXPECTED
 
-if assert-system os linux; then
+if assert-system os linux && assert-system is-graphical; then
     compose h2 "Configuring gnome"
     configure-gnome || exit $EXIT_UNEXPECTED
 fi
