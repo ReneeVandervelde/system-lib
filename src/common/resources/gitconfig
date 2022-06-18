@@ -1,0 +1,7 @@
+[user]
+        name = Renee Vandervelde
+[core]
+        excludesfile = ~/.gitignore
+	editor = /usr/bin/vim
+[commit]
+        gpgsign = true

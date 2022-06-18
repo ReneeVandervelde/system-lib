@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+echo "Initializing..."
+ROOTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+echo "Linking Bash Config"
+if [ -f $HOME/.bash_profile ]; then mv $HOME/.bash_profile $HOME/.bash_profile.old || exit $?; fi
+ln -s $ROOTDIR/src/common/bash/profiles/main.bash_profile $HOME/.bash_profile || exit $?
+trash ~/.bash_profile.old
+
+echo "Reloading Environment"
+source ~/.bash_profile
+
+compose success "Init Complete! Running Setup scripts."
+lib-setup || exit $?

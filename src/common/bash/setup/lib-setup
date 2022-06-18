@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+compose h1 "Installing Core Dependencies"
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    if ! assert-system has-command brew; then
+        compose h3 "Installing HomeBrew."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+    fi
+
+    if ! assert-system has-command brew; then
+        compose error "Installation Failed. Try https://brew.sh"
+        exit $EXIT_UNEXPECTED;
+    fi
+fi
+
+compose hr
+compose h1 "Installing Libraries"
+
+if assert-system has-command brew; then 
+    compose h2 "Installing Homebrew Packages"
+    brew install $(cat "$LIB_SRC_ROOT/macos/resources/packages-brew" | tr '\r\n' ' ') || exit $EXIT_UNEXPECTED
+fi
+
+if assert-system has-command dnf; then
+    compose h2 "Updating DNF Packages"
+    sudo dnf update || exit $EXIT_UNEXPECTED
+    compose h2 "Installing DNF Packages"
+    sudo dnf install $(cat "$LIB_SRC_ROOT/rhel/resources/packages-dnf" | tr '\r\n' ' ') || exit $EXIT_UNEXPECTED
+fi
+
+if assert-system has-command snap; then
+    compose h2 "Installing Snap Packages"
+    if [ ! -L /snap ]; then sudo ln -s /var/lib/snapd/snap /snap || exit $EXIT_UNEXPECTED; fi
+    while read in; do 
+        sudo snap install $in || exit $EXIT_UNEXPECTED
+    done < $LIB_SRC_ROOT/linux/resources/packages-snap
+    while read in; do 
+        sudo snap install --classic $in || exit $EXIT_UNEXPECTED
+    done < $LIB_SRC_ROOT/linux/resources/packages-snap-classic
+fi
+
+compose hr
+compose h1 "Configuring"
+
+if assert-system os rhel; then
+    compose step "Enabling resilio-sync"
+    systemctl --user enable resilio-sync || exit $EXIT_UNEXPECTED
+fi
+
+compose h2 "Linking configurations"
+if assert-system os macos; then 
+    re-link $$LIB_SRC_ROOT/macos/resources/.hyper.js $HOME/.hyper.js || exit $EXIT_UNEXPECTED
+fi
+if assert-system os linux; then
+    re-link $LIB_SRC_ROOT/linux/resources/.hyper.js $HOME/.hyper.js || exit $EXIT_UNEXPECTED
+fi
+re-link $LIB_SRC_ROOT/common/resources/gitconfig $HOME/.gitconfig || exit $EXIT_UNEXPECTED
+re-link $LIB_SRC_ROOT/common/resources/gitignore $HOME/.gitignore || exit $EXIT_UNEXPECTED
+re-link $LIB_SRC_ROOT/common/resources/inputrc $HOME/.inputrc || exit $EXIT_UNEXPECTED
+
+if assert-system os linux; then
+    compose h2 "Configuring gnome"
+    configure-gnome || exit $EXIT_UNEXPECTED
+fi
+
+compose spacer
+compose hr
+compose success "Setup Complete"
