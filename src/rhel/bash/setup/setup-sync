@@ -1,18 +1,27 @@
 #!/usr/bin/env bash
 
+CERTFILE=$HOME/sync.key
+KEYFILE=$HOME/sync.crt
+
+if [ ! -f $CERTFILE ] || [ ! -f $KEYFILE ]; then
+    compose error "Script requires a cert+key pair uploaded to the home directory. Expected files at:"
+    compose li $CERTFILE
+    compose li $KEYFILE
+    exit $EXIT_ILLEGAL_ARG
+fi
+
 compose h1 "Configuring DNF Repo"
-sudo mv $LIB_SRC_ROOT/rhel/resources/resilio-sync.repo /etc/yum.repos.d/ || exit $EXIT_UNEXPECTED;
+sudo cp $LIB_SRC_ROOT/rhel/resources/resilio-sync.repo /etc/yum.repos.d/ || exit $EXIT_UNEXPECTED;
 sudo dnf config-manager --add-repo /etc/yum.repos.d/resilio-sync.repo || exit $EXIT_UNEXPECTED;
 sudo dnf config-manager --set-enabled resilio-sync || exit $EXIT_UNEXPECTED;
-
 
 compose h1 "Installing Resilio Sync"
 sudo dnf install resilio-sync chkconfig || exit $EXIT_UNEXPECTED;
 
 compose h1 "Configuring Sync"
-sudo mv sync-server.json /etc/resilio-sync/config.json || exit $EXIT_UNEXPECTED;
-sudo mv sync.key /var/lib/resilio-sync/ || exit $EXIT_UNEXPECTED;
-sudo mv sync.crt /var/lib/resilio-sync/ || exit $EXIT_UNEXPECTED;
+sudo cp $LIB_SRC_ROOT/src/rhel/resources/sync-server.json /etc/resilio-sync/config.json || exit $EXIT_UNEXPECTED;
+sudo mv $KEYFILE /var/lib/resilio-sync/ || exit $EXIT_UNEXPECTED;
+sudo mv $CERTFILE /var/lib/resilio-sync/ || exit $EXIT_UNEXPECTED;
 sudo firewall-cmd --permanent --add-port=8888/tcp  || exit $EXIT_UNEXPECTED;
 sudo firewall-cmd --permanent --add-port=34034/tcp  || exit $EXIT_UNEXPECTED;
 sudo firewall-cmd --permanent --add-port=34034/udp  || exit $EXIT_UNEXPECTED;
