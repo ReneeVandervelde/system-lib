@@ -15,7 +15,7 @@ function __setDefaultTitle() {
     if [ -z ${__TITLE_OVERRIDE+x} ]; then
         case "$BASH_COMMAND" in
             "__prompt_command")
-                __setTitle $(hostname)
+                __setTitle $(hostname) - $(basename $PWD)
                 ;;
             *)
                 __setTitle ${BASH_COMMAND%% *}
