@@ -32,5 +32,10 @@ if assert-system has-command flatpak; then
     flatpak update -y || exit $EXIT_UNEXPECTED
 fi
 
+compose h2 "Updating Libs"
+cd $LIB_HOME
+    git pull --ff-only https://github.com/ReneeVandervelde/system-lib.git master
+cd -
+
 compose hr
 compose success "All Updates Complete"
