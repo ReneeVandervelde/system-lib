@@ -19,19 +19,21 @@ compose h1 "Installing Libraries"
 
 if assert-system has-command brew; then 
     compose h2 "Installing Homebrew Packages"
-    brew install $(cat "$LIB_SRC_ROOT/macos/resources/packages-brew" | tr '\r\n' ' ') || exit $EXIT_UNEXPECTED
+    brew install $(tr '\r\n' ' ' < "$LIB_SRC_ROOT/macos/resources/packages-brew") || exit $EXIT_UNEXPECTED
 fi
 
 if assert-system has-command dnf; then
     compose h2 "Updating DNF Packages"
     sudo dnf update || exit $EXIT_UNEXPECTED
     compose h2 "Installing DNF Packages"
-    sudo dnf install $(cat "$LIB_SRC_ROOT/rhel/resources/packages-dnf" | tr '\r\n' ' ') || exit $EXIT_UNEXPECTED
+    sudo dnf install $(tr '\r\n' ' ' < "$LIB_SRC_ROOT/rhel/resources/packages-dnf") || exit $EXIT_UNEXPECTED
 fi
 
 if assert-system has-command rpm-ostree; then
     compose h2 "Installing ostree updates"
     sudo rpm-ostree upgrade || $EXIT_UNEXPECTED
+    compose h2 "Installing ostree layers"
+    sudo rpm-ostree install $(tr '\r\n' ' ' < "$LIB_SRC_ROOT/rhel/resources/packages-ostree") || exit $EXIT_UNEXPECTED
 fi
 
 if assert-system is-graphical; then 
