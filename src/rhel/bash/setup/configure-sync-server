@@ -10,15 +10,12 @@ if [ ! -f $CERTFILE ] || [ ! -f $KEYFILE ]; then
     exit $EXIT_ILLEGAL_ARG
 fi
 
-compose h1 "Configuring DNF Repo"
-sudo cp $LIB_SRC_ROOT/rhel/resources/resilio-sync.repo /etc/yum.repos.d/ || exit $EXIT_UNEXPECTED;
-sudo dnf config-manager --add-repo /etc/yum.repos.d/resilio-sync.repo || exit $EXIT_UNEXPECTED;
-sudo dnf config-manager --set-enabled resilio-sync || exit $EXIT_UNEXPECTED;
+configure-sync || $EXIT_UNEXPECTED
 
-compose h1 "Installing Resilio Sync"
-sudo dnf install resilio-sync || exit $EXIT_UNEXPECTED;
+compose h2 "Stopping Service for reconfigure"
+sudo systemctl stop resilio-sync.service || exit $EXIT_UNEXPECTED
 
-compose h1 "Configuring Sync"
+compose h1 "Configuring Sync Server"
 sudo cp $LIB_SRC_ROOT/rhel/resources/sync-server.json /etc/resilio-sync/config.json || exit $EXIT_UNEXPECTED;
 sudo mv $KEYFILE /var/lib/resilio-sync/ || exit $EXIT_UNEXPECTED;
 sudo mv $CERTFILE /var/lib/resilio-sync/ || exit $EXIT_UNEXPECTED;
@@ -30,13 +27,7 @@ sudo firewall-cmd --permanent --add-port=1900/udp  || exit $EXIT_UNEXPECTED;
 sudo firewall-cmd --permanent --add-port=5351/udp  || exit $EXIT_UNEXPECTED;
 sudo service firewalld restart || exit $EXIT_UNEXPECTED;
 
-if assert-system is-graphical; then
-    sudo systemctl --user enable resilio-sync.service || exit $EXIT_UNEXPECTED
-else
-    sudo systemctl enable resilio-sync.service || exit $EXIT_UNEXPECTED
-fi
-
-compose h2 "Starting Service"
+compose h2 "Re-starting Service"
 sudo systemctl start resilio-sync.service || exit $EXIT_UNEXPECTED
  
- compose success "Successfully installed Sync"
+ compose success "Successfully configured Sync server"
