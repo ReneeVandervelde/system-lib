@@ -29,6 +29,11 @@ if assert-system has-command dnf; then
     sudo dnf install $(cat "$LIB_SRC_ROOT/rhel/resources/packages-dnf" | tr '\r\n' ' ') || exit $EXIT_UNEXPECTED
 fi
 
+if assert-system has-command rpm-ostree; then
+    compose h2 "Installing ostree updates"
+    sudo rpm-ostree upgrade || $EXIT_UNEXPECTED
+fi
+
 if assert-system is-graphical; then 
     if assert-system has-command snap; then
         compose h2 "Installing Snap Packages"

@@ -12,6 +12,11 @@ if assert-system has-command dnf; then
     sudo dnf update || exit $EXIT_UNEXPECTED
 fi
 
+if assert-system has-command rpm-ostree; then
+    compose h2 "Installing ostree updates"
+    sudo rpm-ostree upgrade || $EXIT_UNEXPECTED
+fi
+
 if assert-system has-command brew; then
     compose h2 "Updating HomeBrew"
     brew update && brew upgrade && brew cleanup || exit $EXIT_UNEXPECTED
