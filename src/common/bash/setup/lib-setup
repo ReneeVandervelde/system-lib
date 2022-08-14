@@ -47,9 +47,12 @@ if assert-system is-graphical; then
     fi
 
     if assert-system has-command flatpak; then
+        compose h2 "Enabling Flathub"
+        sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
         compose h2 "Installing Flatpak Packages"
         while read in; do 
-            flatpak install $in || exit $EXIT_UNEXPECTED
+            flatpak install -y $in || exit $EXIT_UNEXPECTED
         done < $LIB_SRC_ROOT/linux/resources/packages-flatpak
     fi
 fi
