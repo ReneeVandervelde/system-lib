@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+case "$1" in 
+    "help"|"--help"|"-h")
+        echo "USAGE: git-sign-as [ink|renee|none]"
+        ;;
+    "ink")
+        git config user.email "Renee@InkApplications.com"
+        git config user.signingkey "E24AF50FA0237AA7"
+        git config commit.gpgsign true
+        ;;
+    "renee")
+        git config user.email "Renee@ReneeVandervelde.com"
+        git config user.signingkey "1E3B6A09031AACF4"
+        git config commit.gpgsign true
+        ;;
+    "none"|"clear"|"remove")
+        git config --unset user.signingkey
+        git config commit.gpgsign false
+        ;;
+    *)
+        >&2 echo "No signing config for $1"
+        exit 1;
+esac
