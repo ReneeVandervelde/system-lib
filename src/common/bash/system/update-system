@@ -39,7 +39,7 @@ fi
 
 compose h2 "Updating Libs"
 cd $LIB_HOME
-    git pull --ff-only https://github.com/ReneeVandervelde/system-lib.git master
+    git pull --ff-only --verify-signatures https://github.com/ReneeVandervelde/system-lib.git master
 cd -
 
 compose hr
