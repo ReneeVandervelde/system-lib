@@ -14,6 +14,9 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     fi
 fi
 
+compose step "Creating Directories"
+mkdir -p $BIN_HOME
+
 compose hr
 compose h1 "Installing Libraries"
 
