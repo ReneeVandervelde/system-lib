@@ -15,3 +15,10 @@ gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-right "['<Sup
 
 compose step "Remap capslock to escape"
 gsettings set org.gnome.desktop.input-sources xkb-options "['caps:escape']"
+
+compose step "Map Brightness to (super+F7/F8) keys"
+gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/brightness-up/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/brightness-down/']"
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/brightness-down/ command 'gdbus call --session --dest org.gnome.SettingsDaemon.Power --object-path /org/gnome/SettingsDaemon/Power --method org.gnome.SettingsDaemon.Power.Screen.StepDown'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/brightness-up/ command 'gdbus call --session --dest org.gnome.SettingsDaemon.Power --object-path /org/gnome/SettingsDaemon/Power --method org.gnome.SettingsDaemon.Power.Screen.StepUp'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/brightness-down/ binding '<Super>F7'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/brightness-up/ binding '<Super>F8'
