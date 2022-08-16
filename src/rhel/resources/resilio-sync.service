@@ -1,0 +1,12 @@
+[Unit]
+Description=Resilio Sync Service
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=forking
+ExecStart=%h/bin/rslsync
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
