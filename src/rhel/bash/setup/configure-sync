@@ -10,7 +10,7 @@ fi
 compose h1 "Installing Resilio Sync"
 if assert-system has-command dnf; then
     sudo dnf install resilio-sync || exit $EXIT_UNEXPECTED
-else if assert-system has-command rpm-ostree; then
+elif assert-system has-command rpm-ostree; then
     sudo rpm-ostree install resilio-sync || exit $EXIT_UNEXPECTED
 else
     compose error "No installer for sync repository"
@@ -26,7 +26,9 @@ else
     sudo systemctl enable resilio-sync.service || exit $EXIT_UNEXPECTED
 fi
 
-compose h2 "Starting Service"
-sudo systemctl start resilio-sync.service || exit $EXIT_UNEXPECTED
+if assert-system has-command dnf; then
+    compose h2 "Starting Service"
+    sudo systemctl start resilio-sync.service || exit $EXIT_UNEXPECTED
+fi
  
 compose success "Successfully installed Sync"
