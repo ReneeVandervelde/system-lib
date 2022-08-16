@@ -2,6 +2,6 @@
         name = Renee Vandervelde
 [core]
         excludesfile = ~/.gitignore
-	editor = /usr/bin/vim
+	editor = /usr/bin/env vi
 [commit]
         gpgsign = true
