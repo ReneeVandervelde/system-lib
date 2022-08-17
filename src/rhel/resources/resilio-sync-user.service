@@ -5,7 +5,7 @@ After=network-online.target
 
 [Service]
 Type=forking
-ExecStart=%h/bin/rslsync
+ExecStart=%h/Bin/rslsync
 Restart=on-failure
 
 [Install]

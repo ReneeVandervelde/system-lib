@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+compose h1 "Configuring Sync"
+mkdir -p $HOME/.config/systemd/user
+cp $LIB_SRC_ROOT/rhel/resources/resilio-sync-user.service $HOME/.config/systemd/user/resilio-sync.service || exit $EXIT_UNEXPECTED
+
+systemctl --user enable resilio-sync.service || exit $EXIT_UNEXPECTED
+systemctl --user start resilio-sync.service || exit $EXIT_UNEXPECTED
+ 
+compose success "Successfully configured Sync"
