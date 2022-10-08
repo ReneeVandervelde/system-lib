@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 case "$1" in 
-    "help"|"--help"|"-h")
+    "help"|"--help"|"-h"|"")
         echo "USAGE: git-sign-as [ink|renee|none]"
         ;;
     "ink")
