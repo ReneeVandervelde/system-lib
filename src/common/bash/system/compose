@@ -19,6 +19,9 @@ case $style in
     "error")
         echo -e "\\033[31m$@\\033[0m" 1>&2;
         ;;
+    "warning" | "warn")
+        echo -e "\\033[33m$@\\033[0m" 1>&2;
+        ;;
     "step" | "li")
         echo -e " - $@"
         ;;
