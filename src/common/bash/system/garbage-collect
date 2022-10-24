@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
-compose h1 "Garbage collector";
-compose hr;
+mdf "# Garbage collector";
 
-compose h2 "Removing Downloads older than 3 days";
+mdf "## Removing Downloads older than 3 days";
 find ~/Downloads -mindepth 1 -name "*" -ctime +3 -print -exec trash "{}" \;
-compose hr;
+
 
 if [ -d $HOME/Desktop ]; then
-    compose h2 "Removing Desktop Junk";
+    mdf "## Removing Desktop Junk";
     find ~/Desktop -mindepth 1 -name "*" -print -exec trash "{}" \;
-    compose hr
 fi
+
+mdf "++ Success"

@@ -24,7 +24,7 @@ function __os {
             fi
             ;;
         *)
-            compose error "Illegal OS type: $1"
+            mdf ">>> Illegal OS type: $1"
             exit $EXIT_ILLEGAL_ARG;
     esac
 }
@@ -57,12 +57,12 @@ case "$COMMAND" in
         __is_graphical "$@"
         ;;
     *)
-        compose body "Assert information about the system."
-        compose body "Usage: assert-system <command> [<args>]"
-        compose h1 "Commands:"
-        compose li "has-command [command]"
-        compose li "help"
-        compose li "os [linux|rhel|macos]"
+        mdf "Assert information about the system."
+        mdf "> Usage: assert-system <command> [<args>]"
+        mdf "# Commands:"
+        mdf " - has-command [command]"
+        mdf " - help"
+        mdf " - os [linux|rhel|macos]"
 
         if [[ $COMMAND == "help" ]]; then 
             exit 0

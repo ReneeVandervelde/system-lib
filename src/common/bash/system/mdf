@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+ESC=$(printf '\033')
+BOLD="$ESC[1m"
+ITALIC="$ESC[3m"
+UNDERLINE="$ESC[4m"
+STRIKE="$ESC[9m"
+
+BOLD_BLUE="$ESC[01;34m"
+BLUE="$ESC[0;34m"
+
+RED="$ESC[0;31m"
+BOLD_RED="$ESC[01;31m"
+
+YELLOW="$ESC[0;33m"
+BOLD_YELLOW="$ESC[01;33m"
+
+GREEN="$ESC[0;32m"
+BOLD_GREEN="$ESC[01;32m"
+
+MAGENTA="$ESC[0;35m"
+BOLD_MAGENTA="$ESC[01;35m"
+
+CLEAR="$ESC[0m"
+
+OUT="$@"
+
+# Headings:
+OUT=$(echo "$OUT" | sed -r "s/^(# .*)$/$BOLD\1$CLEAR/g")
+OUT=$(echo "$OUT" | sed -r "s/^(## .*)$/$BOLD_BLUE\1$CLEAR/g")
+OUT=$(echo "$OUT" | sed -r "s/^(### .*)$/$BLUE\1$CLEAR/g")
+
+# Inline styles
+OUT=$(echo "$OUT" | sed -r "s/(\*\*.+?\*\*)/$BOLD\1$CLEAR/g")
+OUT=$(echo "$OUT" | sed -r "s/(^|[^*])(\*[^*]+\*)($|[^*])/\1$ITALIC\2$CLEAR\3/g")
+OUT=$(echo "$OUT" | sed -r "s/(_.+?_)/$UNDERLINE\1$CLEAR/g")
+OUT=$(echo "$OUT" | sed -r "s/(~.+?~)/$STRIKE\1$CLEAR/g")
+
+# Custom formatting
+OUT=$(echo "$OUT" | sed -r "s/^(> .*)$/$MAGENTA\1$CLEAR/g")
+OUT=$(echo "$OUT" | sed -r "s/^(>> .*)$/$BOLD_YELLOW\1$CLEAR/g")
+OUT=$(echo "$OUT" | sed -r "s/^(>>> .*)$/$BOLD_RED\1$CLEAR/g")
+OUT=$(echo "$OUT" | sed -r "s/^(\+ .*)$/$GREEN\1$CLEAR/g")
+OUT=$(echo "$OUT" | sed -r "s/^(\+\+ .*)$/$BOLD_GREEN\1$CLEAR/g")
+
+echo "$OUT"

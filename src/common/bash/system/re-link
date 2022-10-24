@@ -2,8 +2,8 @@
 
 case "$1" in
     "help" | "--help" | "-h" | "")
-        echo "Replaces a target file with a link, trashing any existing file.";
-        echo "Usage: re-link [SOURCE] [DESTINATION]";
+        mdf "Replaces a target file with a link, trashing any existing file.";
+        mdf "> Usage: re-link [SOURCE] [DESTINATION]";
         exit 0;
     ;;
 esac
@@ -12,14 +12,14 @@ SOURCE=$1;
 DESTINATION=$2;
 
 if [ ! -f $SOURCE ]; then
-    compose error "Source not found: $SOURCE";
+    mdf ">>> Source not found: $SOURCE";
     exit $EXIT_ILLEGAL_ARG;
 fi
 
 if [ -f "$DESTINATION" ] || [ -L "$DESTINATION" ]; then
-    compose step "Removing old source: $DESTINATION";
+    mdf " - Removing old source: $DESTINATION";
     trash $DESTINATION;
 fi
 
-compose step "Linking $DESTINATION -> $SOURCE";
+mdf " - Linking $DESTINATION -> $SOURCE";
 ln -s $SOURCE $DESTINATION;

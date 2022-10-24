@@ -1,47 +1,46 @@
 #!/usr/bin/env bash
 
-compose h1 "Installing Core Dependencies"
+mdf "# Installing Core Dependencies"
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     if ! assert-system has-command brew; then
-        compose h3 "Installing HomeBrew."
+        mdf "## Installing HomeBrew."
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
     fi
 
     if ! assert-system has-command brew; then
-        compose error "Installation Failed. Try https://brew.sh"
+        mdf ">>> Installation Failed. Try https://brew.sh"
         exit $EXIT_UNEXPECTED;
     fi
 fi
 
-compose step "Creating Directories"
+mdf "# Creating Directories"
 mkdir -p $BIN_HOME
 
-compose hr
-compose h1 "Installing Libraries"
+mdf "# Installing Libraries"
 
 if assert-system has-command brew; then 
-    compose h2 "Installing Homebrew Packages"
+    mdf "## Installing Homebrew Packages"
     brew install $(tr '\r\n' ' ' < "$LIB_SRC_ROOT/macos/resources/packages-brew") || exit $EXIT_UNEXPECTED
 fi
 
 if assert-system has-command dnf; then
-    compose h2 "Updating DNF Packages"
+    mdf "## Updating DNF Packages"
     sudo dnf update || exit $EXIT_UNEXPECTED
-    compose h2 "Installing DNF Packages"
+    mdf "## Installing DNF Packages"
     sudo dnf install $(tr '\r\n' ' ' < "$LIB_SRC_ROOT/rhel/resources/packages-dnf") || exit $EXIT_UNEXPECTED
 fi
 
 if assert-system has-command rpm-ostree; then
-    compose h2 "Installing ostree updates"
+    mdf "## Installing ostree updates"
     sudo rpm-ostree upgrade || $EXIT_UNEXPECTED
-    compose h2 "Installing ostree layers"
+    mdf "## Installing ostree layers"
     sudo rpm-ostree install $(tr '\r\n' ' ' < "$LIB_SRC_ROOT/rhel/resources/packages-ostree") || exit $EXIT_UNEXPECTED
 fi
 
 if assert-system is-graphical; then 
     if assert-system has-command snap; then
-        compose h2 "Installing Snap Packages"
+        mdf "## Installing Snap Packages"
         if [ ! -L /snap ]; then sudo ln -s /var/lib/snapd/snap /snap || exit $EXIT_UNEXPECTED; fi
         while read in; do 
             sudo snap install $in || exit $EXIT_UNEXPECTED
@@ -52,20 +51,19 @@ if assert-system is-graphical; then
     fi
 
     if assert-system has-command flatpak; then
-        compose h2 "Enabling Flathub"
+        mdf "## Enabling Flathub"
         sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
-        compose h2 "Installing Flatpak Packages"
+        mdf "## Installing Flatpak Packages"
         while read in; do 
             flatpak install -y $in || exit $EXIT_UNEXPECTED
         done < $LIB_SRC_ROOT/linux/resources/packages-flatpak
     fi
 fi
 
-compose hr
-compose h1 "Configuring"
+mdf "# Configuring"
 
-compose h2 "Linking configurations"
+mdf "## Linking configurations"
 if assert-system os macos; then 
     re-link $$LIB_SRC_ROOT/macos/resources/.hyper.js $HOME/.hyper.js || exit $EXIT_UNEXPECTED
 fi
@@ -77,10 +75,8 @@ re-link $LIB_SRC_ROOT/common/resources/gitignore $HOME/.gitignore || exit $EXIT_
 re-link $LIB_SRC_ROOT/common/resources/inputrc $HOME/.inputrc || exit $EXIT_UNEXPECTED
 
 if assert-system os linux && assert-system is-graphical; then
-    compose h2 "Configuring gnome"
+    mdf "## Configuring gnome"
     configure-gnome || exit $EXIT_UNEXPECTED
 fi
 
-compose spacer
-compose hr
-compose success "Setup Complete"
+mdf "++ Setup Complete"
