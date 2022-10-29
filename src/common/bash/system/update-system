@@ -1,46 +1,52 @@
 #!/usr/bin/env bash
 
-compose h1 "Running System Updates"
+mdf "# Running System Updates"
 
 if assert-system has-command softwareupdate; then
-    compose h2 "OS Native Software"
+    mdf "## OS Native Software"
     softwareupdate -i -a || exit $EXIT_UNEXPECTED
 fi
 
 if assert-system has-command dnf; then
-    compose h2 "Updating DNF"
+    mdf "## Updating DNF"
     sudo dnf update || exit $EXIT_UNEXPECTED
 fi
 
 if assert-system has-command rpm-ostree; then
-    compose h2 "Installing ostree updates"
+    mdf "## Installing ostree updates"
     sudo rpm-ostree upgrade || $EXIT_UNEXPECTED
 fi
 
 if assert-system has-command brew; then
-    compose h2 "Updating HomeBrew"
+    mdf "## Updating HomeBrew"
     brew update && brew upgrade && brew cleanup || exit $EXIT_UNEXPECTED
 fi
 
 if assert-system has-command npm && assert-system has-command node; then
-    compose h2 "Updating NPM"
+    mdf "## Updating NPM"
     sudo npm install npm -g && sudo npm update -g || exit $EXIT_UNEXPECTED
 fi
 
 if assert-system has-command snap; then
-    compose h2 "Updating Snap"
+    mdf "## Updating Snap"
     sudo snap refresh || exit $EXIT_UNEXPECTED
 fi
 
 if assert-system has-command flatpak; then
-    compose h2 "Updating Flatpak"
+    mdf "## Updating Flatpak"
     flatpak update -y || exit $EXIT_UNEXPECTED
 fi
 
-compose h2 "Updating Libs"
+mdf "## Updating bin applications"
+find $BIN_HOME -mindepth 1 -name "*" -print -exec sh -c '\
+if [ -f "$ASSETS_HOME/Software/$(basename {})" ]; then \
+app-install $(basename {}); \
+else mdf "> No Asset file. Skipping"; \
+fi' \;
+
+mdf "## Updating Libs"
 cd $LIB_HOME
     git pull --ff-only --verify-signatures https://github.com/ReneeVandervelde/system-lib.git master
 cd -
 
-compose hr
-compose success "All Updates Complete"
+mdf "++ All Updates Complete"

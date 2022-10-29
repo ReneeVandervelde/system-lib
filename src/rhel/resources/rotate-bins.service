@@ -1,0 +1,9 @@
+[Unit]
+Description=Rotate Bins
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -l -c 'exec "$@"' _ find $BIN_HOME -mindepth 1 -name "*.rotate" -print -exec sh -c 'file-rotate $BIN_HOME $(echo $(basename {} | sed "s/\.rotate$//"))' \;
+
+[Install]
+WantedBy=default.target

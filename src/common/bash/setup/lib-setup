@@ -35,7 +35,7 @@ if assert-system has-command rpm-ostree; then
     mdf "## Installing ostree updates"
     sudo rpm-ostree upgrade || $EXIT_UNEXPECTED
     mdf "## Installing ostree layers"
-    sudo rpm-ostree install $(tr '\r\n' ' ' < "$LIB_SRC_ROOT/rhel/resources/packages-ostree") || exit $EXIT_UNEXPECTED
+    sudo rpm-ostree install --idempotent $(tr '\r\n' ' ' < "$LIB_SRC_ROOT/rhel/resources/packages-ostree") || exit $EXIT_UNEXPECTED
 fi
 
 if assert-system is-graphical; then 
@@ -77,6 +77,22 @@ re-link $LIB_SRC_ROOT/common/resources/inputrc $HOME/.inputrc || exit $EXIT_UNEX
 if assert-system os linux && assert-system is-graphical; then
     mdf "## Configuring gnome"
     configure-gnome || exit $EXIT_UNEXPECTED
+fi
+
+if assert-system os rhel; then
+    mdf "## Configuring Systemd"
+
+    mdf " - Enabling Garbage Collection"
+    cp $LIB_SRC_ROOT/rhel/resources/garbage-collect.service $HOME/.config/systemd/user/ || exit $EXIT_UNEXPECTED
+    systemctl --user enable garbage-collect.service || exit $EXIT_UNEXPECTED
+
+    mdf " - Enabling Bin Rotation"
+    cp $LIB_SRC_ROOT/rhel/resources/rotate-bins.service $HOME/.config/systemd/user/ || exit $EXIT_UNEXPECTED
+    systemctl --user enable rotate-bins.service || exit $EXIT_UNEXPECTED
+
+    mdf " - Enabling App Rotation"
+    cp $LIB_SRC_ROOT/rhel/resources/rotate-applications.service $HOME/.config/systemd/user/ || exit $EXIT_UNEXPECTED
+    systemctl --user enable rotate-applications.service || exit $EXIT_UNEXPECTED
 fi
 
 mdf "++ Setup Complete"

@@ -1,0 +1,9 @@
+[Unit]
+Description=Rotate Applications
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -l -c 'exec "$@"' _ find $APPLICATIONS_HOME -mindepth 1 -name "*.rotate" -print -exec sh -c 'file-rotate $APPLICATIONS_HOME $(echo $(basename {} | sed "s/\.rotate$//"))' \;
+
+[Install]
+WantedBy=default.target

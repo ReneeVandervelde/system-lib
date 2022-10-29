@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+RETURN=0
+case "$1" in
+    "")
+        RETURN=$EXIT_ILLEGAL_ARG
+        mdf ">>> Missing required arguments"
+        ;&
+    "help"|"--help"|"-h")
+        mdf "Loads a property from a properties file by its key"
+        mdf "Usage: get-property [FILE] [KEY]"
+        exit $RETURN
+        ;;
+esac
+
+FILE=$1
+KEY=$2
+
+if [ ! -f "$FILE" ]; then
+    mdf ">>> File does not exist: $FILE"
+    exit $EXIT_ILLEGAL_ARG;
+fi
+
+if [[ $KEY == "" ]]; then
+    mdf ">>> 2nd argument KEY is required"
+    exit $EXIT_ILLEGAL_ARG
+fi
+
+VALUE=$(awk -F "=" "/^$KEY=/ {print "'$2'"; exit; }" $FILE)
+
+echo $VALUE

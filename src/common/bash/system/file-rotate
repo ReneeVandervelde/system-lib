@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+FILE_ROOT=$1
+BIN_NAME=$2
+BIN_DESTINATION="$FILE_ROOT/$BIN_NAME"
+BIN_DESTINATION_ROTATE="$FILE_ROOT/$BIN_NAME.rotate"
+
+if [ ! -f $BIN_DESTINATION_ROTATE ]; then
+    mdf ">>> No rotation found at $BIN_DESTINATION_ROTATE"
+    exit $EXIT_ILLEGAL_ARG
+fi
+
+mdf "# Rotating $BIN_NAME"
+
+mv $BIN_DESTINATION_ROTATE $BIN_DESTINATION
+ROTATE_RESULT=$?
+
+if [[ $ROTATE_RESULT != 0 ]]; then
+    mdf ">> Rotate failed. (exit $ROTATE_RESULT)"
+    mdf "Leaving rotation file in place."
+    exit $ROTATE_RESULT
+fi
+
+mdf "+ Rotate Complete"

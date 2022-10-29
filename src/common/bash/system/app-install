@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+FILE_SOURCE=$1
+BIN_NAME=$2
+case "$FILE_SOURCE" in
+    "bin")
+        TARGET_HOME=$BIN_HOME
+        ;;
+    "app"|"application")
+        TARGET_HOME=$APPLICATIONS_HOME
+        ;;
+    *)
+        mdf ">>> Unknown source: $FILE_SOURCE"
+        exit $EXIT_ILLEGAL_ARG
+esac
+BIN_PATH="$ASSETS_HOME/Software/$BIN_NAME"
+PROPERTIES_FILE="$ASSETS_HOME/Software/$BIN_NAME.properties"
+BIN_DESTINATION="$TARGET_HOME/$BIN_NAME"
+BIN_DESTINATION_ROTATE="$TARGET_HOME/$BIN_NAME.rotate"
+SIG_PATH="$ASSETS_HOME/Software/$BIN_NAME.sig"
+
+if [ ! -f $BIN_PATH ]; then
+    mdf ">>> No Bin found at $BIN_PATH"
+    exit $EXIT_ILLEGAL_ARG
+fi
+
+if [ ! -f $SIG_PATH ]; then
+    mdf ">>> No signature found at $SIG_PATH"
+    exit $EXIT_ILLEGAL_ARG
+fi
+
+if [ -f "$PROPERTIES_FILE" ] && [ -f $BIN_DESTINATION ] && [[ "$(get-property $PROPERTIES_FILE disable_updates)" == true ]]; then
+    mdf "> Updates Disabled for $BIN_NAME"
+    exit 0;
+fi
+
+mdf "# Installing $BIN_NAME"
+
+if [ -f $BIN_DESTINATION ]; then
+    BIN_SHA=$(sha1sum $BIN_PATH | cut -d ' ' -f 1)
+    BIN_DESTINATION_SHA=$(sha1sum $BIN_DESTINATION | cut -d ' ' -f 1)
+    if [[ "$BIN_SHA" == "$BIN_DESTINATION_SHA"  ]]; then
+        mdf "+ up-to-date"
+        exit
+    fi
+fi
+
+mdf "## Verifying App Signature"
+if ! gpg --verify $SIG_PATH $BIN_PATH; then
+    mdf ">>> Failed signature check"
+    exit 2
+fi
+
+mdf "## Copying App"
+
+cp $BIN_PATH $BIN_DESTINATION
+if [[ $? != 0 ]]; then
+    mdf ">> Copy Failed. Bin will rotate at next startup"
+    if [ -f $BIN_DESTINATION_ROTATE ]; then
+        mdf "removing old rotation file at $BIN_DESTINATION_ROTATE"
+        trash $BIN_DESTINATION_ROTATE || exit $EXIT_UNEXPECTED
+    fi
+    cp $BIN_PATH $BIN_DESTINATION_ROTATE
+fi
+
+mdf "++ Installed"
