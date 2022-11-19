@@ -88,6 +88,9 @@ fi
 if assert-system os rhel; then
     mdf "## Configuring Systemd"
 
+    mdf " - Create systemd User Directory"
+    mkdir -p ~/.config/systemd/user/
+
     mdf " - Enabling Garbage Collection"
     cp $LIB_SRC_ROOT/rhel/resources/garbage-collect.service $HOME/.config/systemd/user/ || exit $EXIT_UNEXPECTED
     systemctl --user enable garbage-collect.service || exit $EXIT_UNEXPECTED
