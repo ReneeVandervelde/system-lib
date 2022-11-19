@@ -36,6 +36,12 @@ if assert-system has-command rpm-ostree; then
     sudo rpm-ostree upgrade || $EXIT_UNEXPECTED
     mdf "## Installing ostree layers"
     sudo rpm-ostree install --idempotent $(tr '\r\n' ' ' < "$LIB_SRC_ROOT/rhel/resources/packages-ostree") || exit $EXIT_UNEXPECTED
+    if [ ! -f $HOME/.config/lib-setup-rpm-ostree-complete ]; then
+        touch $HOME/.config/lib-setup-rpm-ostree-complete
+        mdf "> Restart is required to continue Installation."
+        mdf "> Re-Run installation script after restart"
+        exit
+    fi
 fi
 
 if assert-system is-graphical; then 
