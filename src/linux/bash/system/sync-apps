@@ -60,6 +60,7 @@ function removeIfOrphaned {
     fi
 }
 
+mkdir -p $HOME/.local/share/icons/;
 find $SEARCH_DIR -iname "*.appimage" | while read file; do createShortcut "$file"; done;
 touch $SYNC_EXISTING_FILE_TRACKER;
 touch $SYNC_NEW_FILE_TRACKER;
