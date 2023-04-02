@@ -38,9 +38,9 @@ if assert-system has-command flatpak; then
 fi
 
 mdf "## Updating bin applications"
-find $BIN_HOME -mindepth 1 -name "*" -print -exec sh -c '\
+find $BIN_HOME -mindepth 1 -maxdepth 1 -name "*" -print -exec sh -c '\
 if [ -f "$ASSETS_HOME/Software/$(basename {})" ]; then \
-app-install $(basename {}); \
+app-install bin $(basename {}); \
 else mdf "> No Asset file. Skipping"; \
 fi' \;
 

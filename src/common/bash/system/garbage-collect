@@ -11,6 +11,4 @@ if [ -d $HOME/Desktop ]; then
     find ~/Desktop -mindepth 1 -name "*" -print -exec trash "{}" \;
 fi
 
-mdf "## Run!" > ~/gc.log
-
 mdf "++ Success"
