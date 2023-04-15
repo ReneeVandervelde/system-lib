@@ -1,9 +1,0 @@
-#!/bin/bash
-
-mkdir -p $HOME/.ssh
-cat $LIB_SRC_ROOT/linux/resources/id_ecdsa_sk.pub >> $HOME/.ssh/authorized_keys
-cat $LIB_SRC_ROOT/linux/resources/id_ink_ecdsa_sk.pub >> $HOME/.ssh/authorized_keys
-chmod 700 $HOME/.ssh
-chmod 600 $HOME/.ssh/authorized_keys
-
-compose success "Success"

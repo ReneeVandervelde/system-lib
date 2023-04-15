@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+function __status {
+    if assert-system os linux && assert-system has-command gsettings; then
+        mdf "> Current: $(gsettings get org.gnome.desktop.interface text-scaling-factor)"
+    else
+        mdf ">> OS Unsupported"
+        exit 2
+    fi
+}
+
+function __configure {
+    case "$1" in
+        "help" | "--help" | "-h" | "")
+            echo "Scales the display";
+            echo "Usage: scale-display [SCALE]";
+            exit 0;
+        ;;
+    esac
+
+    SCALE=$1;
+
+    if [ "$SCALE" == "" ]; then
+        compose error "Scaling argument required"
+        exit $EXIT_ILLEGAL_ARG;
+    fi
+
+    if assert-system os linux && assert-system has-command gsettings; then
+        gsettings set org.gnome.desktop.interface text-scaling-factor $SCALE
+    else
+        compose error "OS Unsupported"
+        exit $EXIT_ILLEGAL_STATE
+    fi
+}
+
+command=$1;
+shift
+
+case $command in
+    "status")
+        __status $@
+    ;;
+    "configure")
+        __configure $@
+    ;;
+    *)
+        exit $EXIT_ILLEGAL_ARG
+    ;;
+esac

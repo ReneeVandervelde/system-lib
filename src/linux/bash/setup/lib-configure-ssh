@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+personalKey=$LIB_SRC_ROOT/linux/resources/id_ecdsa_sk.pub
+corpKey=$LIB_SRC_ROOT/linux/resources/id_ink_ecdsa_sk.pub
+
+function __status {
+    authFile=$HOME/.ssh/authorized_keys
+
+    grep -qF "$(cat $personalKey)" $authFile || exit 2
+    grep -qF "$(cat $corpKey)" $authFile || exit 2
+}
+
+function __configure {
+    mkdir -p $HOME/.ssh || $EXIT_UNEXPECTED
+    cat $personalKey >> $HOME/.ssh/authorized_keys || $EXIT_UNEXPECTED
+    cat $corpKey >> $HOME/.ssh/authorized_keys || $EXIT_UNEXPECTED
+    chmod 700 $HOME/.ssh || $EXIT_UNEXPECTED
+    chmod 600 $HOME/.ssh/authorized_keys || $EXIT_UNEXPECTED
+}
+
+command=$1;
+shift
+
+case $command in
+    "status")
+        __status $@
+    ;;
+    "configure")
+        __configure $@
+    ;;
+    *)
+        exit $EXIT_ILLEGAL_ARG
+    ;;
+esac

@@ -1,33 +1,37 @@
 #!/usr/bin/env bash
 
-CERTFILE=$HOME/sync.key
-KEYFILE=$HOME/sync.crt
+function __status {
+    if [ ! -f /etc/yum.repos.d/resilio-sync.repo ]; then
+        exit 2
+    fi
+}
 
-if [ ! -f $CERTFILE ] || [ ! -f $KEYFILE ]; then
-    compose error "Script requires a cert+key pair uploaded to the home directory. Expected files at:"
-    compose li $CERTFILE
-    compose li $KEYFILE
-    exit $EXIT_ILLEGAL_ARG
-fi
+function __configure {
+    sudo cp $LIB_SRC_ROOT/rhel/resources/resilio-sync.repo /etc/yum.repos.d/
 
-configure-sync || $EXIT_UNEXPECTED
+    if assert-system has-command rpm-ostree; then
+        sudo rpm-ostree install resilio-sync
+        mdf "> Reboot required"
+    else if assert-system has-command dnf; then
+        sudo dnf install resilio-sync
+        mdf "+ Configured"
+    else
+        mdf ">>> Unsupported OS"
+        exit $EXIT_ILLEGAL_STATE
+    fi
+}
 
-compose h2 "Stopping Service for reconfigure"
-sudo systemctl stop resilio-sync.service || exit $EXIT_UNEXPECTED
+command=$1;
+shift
 
-compose h1 "Configuring Sync Server"
-sudo cp $LIB_SRC_ROOT/rhel/resources/sync-server.json /etc/resilio-sync/config.json || exit $EXIT_UNEXPECTED;
-sudo mv $KEYFILE /var/lib/resilio-sync/ || exit $EXIT_UNEXPECTED;
-sudo mv $CERTFILE /var/lib/resilio-sync/ || exit $EXIT_UNEXPECTED;
-sudo firewall-cmd --permanent --add-port=8888/tcp  || exit $EXIT_UNEXPECTED;
-sudo firewall-cmd --permanent --add-port=34034/tcp  || exit $EXIT_UNEXPECTED;
-sudo firewall-cmd --permanent --add-port=34034/udp  || exit $EXIT_UNEXPECTED;
-sudo firewall-cmd --permanent --add-port=3838/udp  || exit $EXIT_UNEXPECTED;
-sudo firewall-cmd --permanent --add-port=1900/udp  || exit $EXIT_UNEXPECTED;
-sudo firewall-cmd --permanent --add-port=5351/udp  || exit $EXIT_UNEXPECTED;
-sudo service firewalld restart || exit $EXIT_UNEXPECTED;
-
-compose h2 "Re-starting Service"
-sudo systemctl start resilio-sync.service || exit $EXIT_UNEXPECTED
- 
- compose success "Successfully configured Sync server"
+case $command in
+    "status")
+        __status $@
+    ;;
+    "configure")
+        __configure $@
+    ;;
+    *)
+        exit $EXIT_ILLEGAL_ARG
+    ;;
+esac

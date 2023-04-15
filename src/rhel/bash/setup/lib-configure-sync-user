@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+HOSTNAME=$(hostname)
+KEYFILE=$SECURE_HOME/Certificates/$HOSTNAME.key
+CERTFILE=$SECURE_HOME/Certificates/$HOSTNAME.crt
+
+function __status {
+    systemctl --user status resilio-sync.service >/dev/null 2>&1 || exit 2
+}
+
+function __configure {
+    if [ ! -f $CERTFILE ] || [ ! -f $KEYFILE ]; then
+        mdf ">>> Script requires a cert+key pair uploaded to the home directory. Expected files at:"
+        mdf " - $CERTFILE"
+        mdf " - $KEYFILE"
+        exit $EXIT_ILLEGAL_ARG
+    fi
+    if [ ! -f $BIN_FILE ]; then
+        mdf ">>> Executable missing at: $BIN_FILE"
+        exit $EXIT_ILLEGAL_ARG
+    fi
+
+    mdf "# Prepare service for Configure"
+    systemctl --user stop resilio-sync.service
+    result=$?
+    case $result in
+        5|4)
+            mdf " - Copying systemctl service"
+            cp $LIB_SRC_ROOT/rhel/resources/resilio-sync-user.service $HOME/.config/systemd/user/resilio-sync.service || exit $EXIT_UNEXPECTED
+        ;;
+        0)
+            mdf " - Stopped systemctl service"
+        ;;
+        *)
+            mdf ">>> Unknown status returned from systemctl"
+            exit $EXIT_UNEXPECTED;
+    esac
+
+    mdf "# Configuring sync"
+    cat $LIB_SRC_ROOT/rhel/resources/sync-user.json \
+        | sed "s#{{STORAGEDIR}}#$HOME/Downloads#g" \
+        | sed "s#{{SYNCDIR}}#$HOME/.sync#g" \
+        | sed "s#{{CERTFILE}}#$CERTFILE#g" \
+        | sed "s#{{KEYFILE}}#$KEYFILE#g" \
+        > $HOME/.sync/config.json
+
+    mdf "# Configuring Firewall"
+    sudo firewall-cmd --permanent --add-port=8888/tcp  || exit $EXIT_UNEXPECTED
+    sudo firewall-cmd --permanent --add-port=34034/tcp  || exit $EXIT_UNEXPECTED
+    sudo firewall-cmd --permanent --add-port=34034/udp  || exit $EXIT_UNEXPECTED
+    sudo firewall-cmd --permanent --add-port=3838/udp  || exit $EXIT_UNEXPECTED
+    sudo firewall-cmd --permanent --add-port=1900/udp  || exit $EXIT_UNEXPECTED
+    sudo firewall-cmd --permanent --add-port=5351/udp  || exit $EXIT_UNEXPECTED
+    sudo service firewalld restart || exit $EXIT_UNEXPECTED
+
+    mdf "# Starting Service"
+    systemctl --user enable resilio-sync.service || exit $EXIT_UNEXPECTED
+    systemctl --user start resilio-sync.service || exit $EXIT_UNEXPECTED
+
+    mdf "+ Configured"
+}
+
+command=$1;
+shift
+
+case $command in
+    "status")
+        __status $@
+    ;;
+    "configure")
+        __configure $@
+    ;;
+    *)
+        exit $EXIT_ILLEGAL_ARG
+    ;;
+esac

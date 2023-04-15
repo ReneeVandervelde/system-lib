@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+function __configure {
+    # To find commands using a shortcut you can use: gsettings list-schemas | grep keybinding | while read SCHEMA; do   gsettings list-keys $SCHEMA | while read KEY; do     echo -ne "$KEY\t$SCHEMA\t";     gsettings get $SCHEMA $KEY;   done; done | grep '<Super>Up'
+    mdf " - Rebind conflicting keys"
+    gsettings set org.gnome.desktop.wm.keybindings maximize "[]" || exit $EXIT_UNEXPECTED
+    gsettings set org.gnome.mutter.keybindings toggle-tiled-right "['<Super><Alt>Right']" || exit $EXIT_UNEXPECTED
+    gsettings set org.gnome.mutter.keybindings toggle-tiled-left "['<Super><Alt>Left']" || exit $EXIT_UNEXPECTED
+
+    mdf " - Bind control center shortcuts"
+    gsettings set org.gnome.shell.keybindings toggle-overview "['<Super>Space', '<Super>Up']" || exit $EXIT_UNEXPECTED
+
+    mdf " - Bind workspace shortcuts"
+    gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-left "['<Super>Left']" || exit $EXIT_UNEXPECTED
+    gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-right "['<Super>Right']" || exit $EXIT_UNEXPECTED
+
+    mdf " - Remap capslock to escape"
+    gsettings set org.gnome.desktop.input-sources xkb-options "['caps:escape']" || exit $EXIT_UNEXPECTED
+}
+
+function __assert_equals {
+    local schema=$1
+    local command=$2
+    local expected=$3
+    local actual="$(gsettings get $schema $command)"
+
+    if [[ "$expected" != "$actual" ]]; then
+        mdf ">> $schema $commands Not set. Expected <$expected> got <$actual>"
+        exit 2
+    fi
+}
+
+function __status {
+    # conflicting keys
+    __assert_equals org.gnome.desktop.wm.keybindings maximize "@as []"
+    __assert_equals org.gnome.mutter.keybindings toggle-tiled-right "['<Super><Alt>Right']"
+    __assert_equals org.gnome.mutter.keybindings toggle-tiled-left "['<Super><Alt>Left']"
+
+    # control center shortcuts
+    __assert_equals org.gnome.shell.keybindings toggle-overview "['<Super>Space', '<Super>Up']"
+
+    # workspace shortcuts"
+    __assert_equals org.gnome.desktop.wm.keybindings switch-to-workspace-left "['<Super>Left']"
+    __assert_equals org.gnome.desktop.wm.keybindings switch-to-workspace-right "['<Super>Right']"
+
+    # Remap capslock to escape"
+    __assert_equals org.gnome.desktop.input-sources xkb-options "['caps:escape']"
+}
+
+command=$1;
+shift
+
+case $command in
+    "status")
+        __status $@
+    ;;
+    "configure")
+        __configure $@
+    ;;
+    *)
+        exit $EXIT_ILLEGAL_ARG
+    ;;
+esac

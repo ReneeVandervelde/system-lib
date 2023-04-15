@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+
+prefix="lib-configure"
+
+function __full_status {
+    mdf "# Configurations"
+    local commands=$(compgen -c | grep "^$prefix-" | sort | uniq)
+
+    for command in $commands; do
+        $command >/dev/null 2>&1
+        local status=$?
+
+        mdf "## "$(echo "$command" | sed "s/^$prefix-//")
+        __show_status $command
+    done
+
+}
+
+function __show_status {
+    configurationCommand=$1
+    shift
+
+    if ! assert-system has-command "$configurationCommand"; then
+        mdf ">>> Unknown configuration $configurationCommand"
+        exit $EXIT_ILLEGAL_ARG
+    fi
+    $configurationCommand status
+    local result=$?
+    case "$result" in
+        0)
+            mdf "+ Configured"
+        ;;
+        2)
+            mdf ">> Not Configured"
+        ;;
+        *)
+            mdf ">>> Unknown Error"
+        ;;
+    esac
+}
+
+function __status {
+    configuration=$1
+    shift
+    configurationCommand="$prefix-$configuration"
+
+    if [[ "$configuration" == "" ]]; then
+        __full_status
+    else
+        __show_status $configurationCommand
+    fi
+}
+
+function __configure {
+    configuration=$1
+    shift
+    configurationCommand="$prefix-$configuration"
+
+    if [[ "$configuration" == "" ]]; then
+        mdf ">>> Missing argument <configuration>"
+        exit $EXIT_ILLEGAL_ARG
+    fi
+
+    $configurationCommand configure $@
+}
+
+command=$1
+shift
+case "$command" in
+    "help" | "--help" | "-h" | "")
+        mdf "Manage the status and setup of applications/settings";
+        mdf "USAGE: lib-configure [command] [args]"
+        mdf "# Commands";
+        mdf " - status [configuration]"
+        mdf " - install <configuration>"
+        exit 0;
+    ;;
+    "status")
+        __status $@
+    ;;
+    "configure")
+        __configure $@
+        ;;
+    *)
+        mdf ">>> Unknown command $COMMAND"
+        exit $EXIT_ILLEGAL_ARG
+    ;;
+esac

@@ -6,3 +6,4 @@ export HISTFILESIZE=20000
 export BIN_HOME=$HOME/Bin
 export APPLICATIONS_HOME=$HOME/Applications
 export ASSETS_HOME=$HOME/Assets
+export SECURE_HOME=$HOME/Secure

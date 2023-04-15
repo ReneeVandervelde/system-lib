@@ -1,0 +1,12 @@
+{
+    "storage_path" : "{{STORAGEDIR}}",
+    "pid_file" : "{{SYNCDIR}}/sync.pid",
+
+    "webui" :
+    {
+        "force_https": true,
+        "listen" : "0.0.0.0:8888",
+        "ssl_certificate": "{{CERTFILE}}",
+        "ssl_private_key" : "{{KEYFILE}}"
+    }
+}
