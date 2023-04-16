@@ -3,9 +3,12 @@
 HOSTNAME=$(hostname)
 KEYFILE=$SECURE_HOME/Certificates/$HOSTNAME.key
 CERTFILE=$SECURE_HOME/Certificates/$HOSTNAME.crt
+SYNC_HOME=/var/lib/resilio-sync
+BIN_FILE=$SYNC_HOME/rslsync
 
 function __status {
     systemctl status resilio-sync.service >/dev/null 2>&1 || exit 2
+    if [ ! -f $BIN_FILE ]; then exit 2; fi
 }
 
 function __configure {
@@ -13,16 +16,24 @@ function __configure {
         mdf ">>> Script requires a cert+key pair uploaded to the home directory. Expected files at:"
         mdf " - $CERTFILE"
         mdf " - $KEYFILE"
-        exit $EXIT_ILLEGAL_ARG
+        exit $EXIT_ILLEGAL_STATE
+    fi
+    if [ ! -f $BIN_FILE ]; then
+        mdf ">>> Executable missing at: $BIN_FILE"
+        exit $EXIT_ILLEGAL_STATE
     fi
 
-    mdf "# Stopping Service for reconfigure"
-    sudo systemctl stop resilio-sync.service || exit $EXIT_UNEXPECTED
+    mdf "# Prepare service for Configure"
+    sudo systemctl stop resilio-sync.service >/dev/null 2>&1
+    sudo trash -f /etc/systemd/system/resilio-sync.service
+    sudo cp $LIB_SRC_ROOT/rhel/resources/resilio-sync-server.service /etc/systemd/system/resilio-sync.service || exit $EXIT_UNEXPECTED
 
     mdf "# Configuring Sync Server"
-    sudo cp $LIB_SRC_ROOT/rhel/resources/sync-server.json /etc/resilio-sync/config.json || exit $EXIT_UNEXPECTED
-    sudo mv $KEYFILE /var/lib/resilio-sync/ || exit $EXIT_UNEXPECTED
-    sudo mv $CERTFILE /var/lib/resilio-sync/ || exit $EXIT_UNEXPECTED
+    sudo cp $LIB_SRC_ROOT/rhel/resources/sync-server.json $SYNC_HOME/config.json || exit $EXIT_UNEXPECTED
+    sudo mv $KEYFILE $SYNC_HOME || exit $EXIT_UNEXPECTED
+    sudo mv $CERTFILE $SYNC_HOME || exit $EXIT_UNEXPECTED
+    sudo useradd rslsync || exit $EXIT_UNEXPECTED
+    sudo chown -R rslsync:rslsync $SYNC_HOME || exit $EXIT_UNEXPECTED
 
     mdf "# Configuring Firewall"
     sudo firewall-cmd --permanent --add-port=8888/tcp  || exit $EXIT_UNEXPECTED

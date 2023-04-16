@@ -3,6 +3,7 @@
 HOSTNAME=$(hostname)
 KEYFILE=$SECURE_HOME/Certificates/$HOSTNAME.key
 CERTFILE=$SECURE_HOME/Certificates/$HOSTNAME.crt
+BIN_FILE=$BIN_HOME/rslsync
 
 function __status {
     systemctl --user status resilio-sync.service >/dev/null 2>&1 || exit 2
