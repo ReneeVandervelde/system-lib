@@ -42,7 +42,7 @@ function __configure {
     sudo firewall-cmd --permanent --add-port=3838/udp  || exit $EXIT_UNEXPECTED
     sudo firewall-cmd --permanent --add-port=1900/udp  || exit $EXIT_UNEXPECTED
     sudo firewall-cmd --permanent --add-port=5351/udp  || exit $EXIT_UNEXPECTED
-    sudo service firewalld restart || exit $EXIT_UNEXPECTED
+    sudo systemctl restart firewalld || exit $EXIT_UNEXPECTED
 
     mdf "# Starting Service"
     sudo systemctl enable resilio-sync.service || exit $EXIT_UNEXPECTED
