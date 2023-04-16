@@ -1,5 +1,5 @@
 {
-    "storage_path" : "{{STORAGEDIR}}",
+    "storage_path" : "{{SYNCDIR}}",
     "pid_file" : "{{SYNCDIR}}/sync.pid",
 
     "webui" :

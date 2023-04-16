@@ -38,7 +38,6 @@ function __configure {
 
     mdf "# Configuring sync"
     cat $LIB_SRC_ROOT/rhel/resources/sync-user.json \
-        | sed "s#{{STORAGEDIR}}#$HOME/Downloads#g" \
         | sed "s#{{SYNCDIR}}#$HOME/.sync#g" \
         | sed "s#{{CERTFILE}}#$CERTFILE#g" \
         | sed "s#{{KEYFILE}}#$KEYFILE#g" \
