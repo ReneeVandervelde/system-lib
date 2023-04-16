@@ -23,6 +23,13 @@ function __configure {
         exit $EXIT_ILLEGAL_STATE
     fi
 
+    mdf "# Install Dependencies"
+    if assert-system has-command rpm-ostree; then
+        rpm-ostree install libxcrypt-compat
+    elif assert-system has-command dnf; then
+        dnf install libxcrypt-compat;
+    fi
+
     mdf "# Prepare service for Configure"
     sudo systemctl stop resilio-sync.service >/dev/null 2>&1
     sudo trash -f /etc/systemd/system/resilio-sync.service
@@ -30,11 +37,11 @@ function __configure {
 
     mdf "# Configuring Sync Server"
     sudo cp $LIB_SRC_ROOT/rhel/resources/sync-server.json $SYNC_HOME/config.json || exit $EXIT_UNEXPECTED
-    sudo cp $KEYFILE $SYNC_HOME || exit $EXIT_UNEXPECTED
-    sudo cp $CERTFILE $SYNC_HOME || exit $EXIT_UNEXPECTED
+    sudo cp $KEYFILE $SYNC_HOME/sync.key || exit $EXIT_UNEXPECTED
+    sudo cp $CERTFILE $SYNC_HOME/sync.crt || exit $EXIT_UNEXPECTED
     if ! id -u rslsync >/dev/null 2>&1; then
         mdf " - Creating rslsync user"
-        sudo useradd rslsync || exit $EXIT_UNEXPECTED
+        sudo useradd rslsync -s /sbin/nologin || exit $EXIT_UNEXPECTED
     fi
     sudo chown -R rslsync:rslsync $SYNC_HOME || exit $EXIT_UNEXPECTED
 
@@ -47,10 +54,10 @@ function __configure {
     sudo firewall-cmd --permanent --add-port=5351/udp  || exit $EXIT_UNEXPECTED
     sudo systemctl restart firewalld || exit $EXIT_UNEXPECTED
 
-    mdf "# Starting Service"
+    mdf "# Enabling Service"
     sudo systemctl enable resilio-sync.service || exit $EXIT_UNEXPECTED
-    sudo systemctl start resilio-sync.service || exit $EXIT_UNEXPECTED
 
+    mdf "> Please reboot server to start service"
     mdf "+ Configured"
 }
 

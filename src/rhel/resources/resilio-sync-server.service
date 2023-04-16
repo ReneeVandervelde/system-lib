@@ -9,7 +9,7 @@ Restart=on-failure
 User=rslsync
 Group=rslsync
 PIDFile=/var/lib/resilio-sync/sync.pid
-ExecStart=/var/lib/resilio-sync/rslsync --config var/lib/resilio-sync/config.json
+ExecStart=/var/usrlocal/bin/rslsync --config /var/lib/resilio-sync/config.json
 
 [Install]
 WantedBy=multi-user.target
