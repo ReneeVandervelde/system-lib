@@ -30,8 +30,8 @@ function __configure {
 
     mdf "# Configuring Sync Server"
     sudo cp $LIB_SRC_ROOT/rhel/resources/sync-server.json $SYNC_HOME/config.json || exit $EXIT_UNEXPECTED
-    sudo mv $KEYFILE $SYNC_HOME || exit $EXIT_UNEXPECTED
-    sudo mv $CERTFILE $SYNC_HOME || exit $EXIT_UNEXPECTED
+    sudo cp $KEYFILE $SYNC_HOME || exit $EXIT_UNEXPECTED
+    sudo cp $CERTFILE $SYNC_HOME || exit $EXIT_UNEXPECTED
     sudo useradd rslsync || exit $EXIT_UNEXPECTED
     sudo chown -R rslsync:rslsync $SYNC_HOME || exit $EXIT_UNEXPECTED
 
