@@ -13,3 +13,8 @@ for f in $LIB_SRC_ROOT/common/bash/profiles/*.bash_profile; do
     if [[ "$f" == "$LIB_SRC_ROOT/common/bash/profiles/main.bash_profile" ]]; then continue; fi
     source $f
 done
+
+# Load local override last
+if [ -f $HOME/.local.bash_profile ]; then
+  source $HOME/.local.bash_profile
+fi
