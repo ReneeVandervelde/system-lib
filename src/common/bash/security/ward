@@ -86,7 +86,7 @@ function __prepareTmpFolder {
 }
 
 function __airlock {
-    ____assert-home-safety;
+    __assert-home-safety;
     __prepareTmpFolder;
     local FILE="";
     local SAVE=false;
