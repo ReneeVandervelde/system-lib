@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+if ! assert-system has-command usbguard; then
+    mdf ">>> usbguard not available"
+    exit $EXIT_ILLEGAL_STATE
+fi
+
+mdf "# Blocked USB Devices:"
+usbguard list-devices -b
+
+mdf "--------"
+mdf "Allow device (or 'q' to quit):"
+read device_number
+
+if [[ $device_number == "q" ]]; then
+    mdf "> Quitting..."
+    exit 0
+fi
+
+usbguard allow-device $device_number
