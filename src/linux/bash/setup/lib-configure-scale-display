@@ -21,14 +21,14 @@ function __configure {
     SCALE=$1;
 
     if [ "$SCALE" == "" ]; then
-        compose error "Scaling argument required"
+        mdf ">>> Scaling argument required"
         exit $EXIT_ILLEGAL_ARG;
     fi
 
     if assert-system os linux && assert-system has-command gsettings; then
         gsettings set org.gnome.desktop.interface text-scaling-factor $SCALE
     else
-        compose error "OS Unsupported"
+        mdf ">>> OS Unsupported"
         exit $EXIT_ILLEGAL_STATE
     fi
 }

@@ -2,7 +2,7 @@
 WARD_HOME=$HOME/.ward;
 
 if [ -z "$WARD_KEY" ]; then
-    compose error "Environment variable 'WARD_KEY' was not set.";
+    mdf ">>> Environment variable 'WARD_KEY' was not set.";
     exit $EXIT_ILLEGAL_STATE;
 fi
 
@@ -11,7 +11,7 @@ shift;
 
 function __assert-home-safety {
     if [[ $(stat -c "%a" $WARD_HOME) != "700" ]]; then
-        compose error "Illegal permissions on ward home. Please init or clean."
+        mdf ">>> Illegal permissions on ward home. Please init or clean."
         exit $EXIT_ILLEGAL_STATE
     fi
 }
@@ -20,7 +20,7 @@ function __encrypt {
     local FILE=$(echo $1 | sed 's:/*$::');
     shift;
     if [[ "$FILE" == "." ]]; then
-        compose error "Cannot close current directory"
+        mdf ">>> Cannot close current directory"
         exit $EXIT_ILLEGAL_ARG;
     fi;
 
@@ -34,7 +34,7 @@ function __encrypt {
         rm $FILE;
         echo $FILE.asc;
     else
-        compose error "File not found: $FILE"
+        mdf ">>> File not found: $FILE"
         exit $EXIT_ILLEGAL_ARG;
     fi
 }
@@ -43,7 +43,7 @@ function __decrypt {
     FILE=$1;
     shift;
     if [ -z "$FILE" ]; then
-        compose error "File argument required."
+        mdf ">>> File argument required."
         exit $EXIT_ILLEGAL_ARG;
     fi
     local DECRYPTED=$(echo $FILE | rev | cut -f 2- -d '.' | rev)
@@ -66,18 +66,18 @@ function __copy-prop {
     shift;
 
     if [ -z "$FILE" ]; then
-        compose error "File argument required."
+        mdf ">>> File argument required."
         exit $EXIT_ILLEGAL_ARG;
     fi
 
     if [ -z "$PROPERTY" ]; then
-        compose error "Property argument required."
+        mdf ">>> Property argument required."
         exit $EXIT_ILLEGAL_ARG;
     fi
 
     gpg --decrypt $FILE | grep "$PROPERTY" | cut -d'=' -f2 | clip
-    compose success "Copied $FILE/$PROPERTY to clipboard"
-    compose warning "Use within 30 seconds"
+    mdf "+ Copied $FILE/$PROPERTY to clipboard"
+    mdf "> Use within 30 seconds"
     $(sleep 30 && echo "" | clip) & 
 }
 
@@ -111,17 +111,17 @@ function __airlock {
     local FILENAME=$(basename $FILE)
     cd $AIRLOCK;
         local DECRYPTED=$(__decrypt $FILENAME || (__shred $AIRLOCK; exit $EXIT_UNEXPECTED));
-        compose hr
-        compose h1 "Airlock for $FILENAME"
-        compose body "To close, exit this shell."
-        compose hr
+        mdf "----------"
+        mdf "# Airlock for $FILENAME"
+        mdf "To close, exit this shell."
+        mdf "----------"
         ls -als
-        compose hr
+        mdf "----------"
         bash -l
         local STATUS=$?
 
         if [ $SAVE = true ] && [ $STATUS = 0 ]; then
-            compose body "Saving Changes"
+            mdf "Saving Changes"
             __encrypt $DECRYPTED;
             cp -i $FILENAME $START_DIR/;
         fi
@@ -134,7 +134,7 @@ function __shred {
     local FILE=$1;
     
     if [[ "$FILE" == "" ]] || [[ "$FILE" == "/" ]] || [[ "$FILE" == "." ]]; then
-        compose error "Refusing to shred ambiguous directory"
+        mdf ">>> Refusing to shred ambiguous directory"
         exit $EXIT_ILLEGAL_ARG;
     fi
 
@@ -144,7 +144,7 @@ function __shred {
     elif [[ -f "$FILE" ]]; then
         shred --remove $FILE;
     else
-        compose warning "Shred file not found: $FILE"
+        mdf ">> Shred file not found: $FILE"
     fi
 }
 
@@ -164,15 +164,15 @@ function __keymod {
     cd $AIRLOCK;
         __decrypt $KEYCHAIN || (__shred $AIRLOCK; exit $EXIT_UNEXPECTED);
         if [[ ! -f "$KEY_PUBLIC" ]] || [[ ! -f "$KEY_PRIVATE" ]]; then
-            compose error "Key-pair for <$KEYNAME> not found";
+            mdf ">>> Key-pair for <$KEYNAME> not found";
             __shred $AIRLOCK;
             exit $EXIT_ILLEGAL_ARG;
         fi
         gpg --import $KEY_PUBLIC $KEY_PRIVATE;
-        compose hr;
-        compose h1 "Editing $KEYNAME"
-        compose body "To close, exit this shell."
-        compose hr;
+        mdf "----------"
+        mdf "# Editing $KEYNAME"
+        mdf "To close, exit this shell."
+        mdf "----------"
         bash -l;
         gpg --delete-secret-key $KEYNAME\!;
     cd -;
@@ -184,44 +184,44 @@ function __push-key {
     KEY=$1
 
     if [[ "$KEY" == "" ]]; then
-        compose error "Key argument missing"
+        mdf ">>> Key argument missing"
         exit $EXIT_ILLEGAL_ARG
     fi
 
-    compose h1 "Sending key to keyservers"
+    mdf "# Sending key to keyservers"
     __push-key-keyserver $KEY keyserver.ubuntu.com
     __push-key-keyserver $KEY pgp.mit.edu
     __push-key-keyserver $KEY keys.openpgp.org
-    compose success "Keys pushed"
+    mdf "++ Keys pushed"
 }
 
 function __push-key-keyserver {
-    compose step "Pushing to: $2"
+    mdf " - Pushing to: $2"
     gpg --keyserver $2 --send-keys $1
 }
 
 function __init {
-    compose step "Initializing WARD_HOME at $WARD_HOME"
+    mdf " - Initializing WARD_HOME at $WARD_HOME"
     mkdir -p $WARD_HOME;
     chmod 700 $WARD_HOME;
 }
 
 function __clean {
-    compose step "Shreding working directory"
+    mdf " - Shreding working directory"
     __shred $WARD_HOME
     __init
 }
 
 function __help {
-    compose h1 "Commands:"
-    compose body "[airlock] [file] [--save] - Opens a file in a temporary directory that will be destroyed when closed."
-    compose body "[clean] - Clean and re-initialize ward."
-    compose body "[copy-prop] [file] [property] - Copy a property from an encrypted file"
-    compose body "[decrypt] [file] - Decrypts a file."
-    compose body "[encrypt] [file] - Encrypts a file."
-    compose body "[init] - Initialize Ward configuration"
-    compose body "[keymod] [key] - Temporarily imports a private key"
-    compose body "[push-key] [key] - Pushes a key to PGP keyservers"
+    mdf "# Commands:"
+    mdf "[airlock] [file] [--save] - Opens a file in a temporary directory that will be destroyed when closed."
+    mdf "[clean] - Clean and re-initialize ward."
+    mdf "[copy-prop] [file] [property] - Copy a property from an encrypted file"
+    mdf "[decrypt] [file] - Decrypts a file."
+    mdf "[encrypt] [file] - Encrypts a file."
+    mdf "[init] - Initialize Ward configuration"
+    mdf "[keymod] [key] - Temporarily imports a private key"
+    mdf "[push-key] [key] - Pushes a key to PGP keyservers"
 }
 
 case $COMMAND in
@@ -253,7 +253,7 @@ case $COMMAND in
         __push-key $@;
         ;;
     *)
-        compose error "Command '$COMMAND' not found";
+        mdf ">>> Command '$COMMAND' not found";
         __help;
         exit $EXIT_ILLEGAL_ARG;
 esac

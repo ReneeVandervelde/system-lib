@@ -11,5 +11,5 @@ trash ~/.bash_profile.old
 echo "Reloading Environment"
 source ~/.bash_profile
 
-compose success "Init Complete! Running Setup scripts."
+mdf "+ Init Complete! Running Setup scripts."
 lib-setup || exit $?

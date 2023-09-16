@@ -2,11 +2,11 @@
 
 case "$1" in
     "help" | "--help" | "-h" | "")
-        compose body "Setup encryption on a specified drive";
-        compose warn "This will FORMAT the drive, erasing its contents!"
-        compose body "Usage: encrypt-drive [drive] ([mount-target])";
-        compose body "    [drive] - The partition path to encrypt (eg. /dev/sda1)"
-        compose body "    [mount-target] - A mount-point to initialize the drive on after complete (eg. /media/example) (optional)"
+        mdf "Setup encryption on a specified drive";
+        mdf ">> This will FORMAT the drive, erasing its contents!"
+        mdf "Usage: encrypt-drive [drive] ([mount-target])";
+        mdf "    [drive] - The partition path to encrypt (eg. /dev/sda1)"
+        mdf "    [mount-target] - A mount-point to initialize the drive on after complete (eg. /media/example) (optional)"
         exit 0;
     ;;
 esac
@@ -14,11 +14,11 @@ esac
 DRIVE=$1;
 
 if [ "$DRIVE" == "" ]; then
-    compose error "Drive argument required (eg. /dev/sda1)"
+    mdf ">>> Drive argument required (eg. /dev/sda1)"
     exit $EXIT_ILLEGAL_ARG;
 fi
 
-compose h1 "Encrypting $DRIVE"
+mdf "# Encrypting $DRIVE"
 
 # Encrypt the partition
 sudo cryptsetup luksFormat $DRIVE
@@ -26,7 +26,7 @@ sudo cryptsetup luksFormat $DRIVE
 # Unlock Partition
 read -p "Mapper Label (eg. 'media', 'data'): " DM
 if [ "$DM" == "" ]; then
-    compose error "DM argument required"
+    mdf ">>> DM argument required"
     exit $EXIT_ILLEGAL_ARG;
 fi
 sudo cryptsetup luksOpen $DRIVE $DM

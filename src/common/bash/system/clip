@@ -5,6 +5,6 @@ if assert-system os linux; then
 elif assert-system os macos; then
     pbcopy
 else
-    compose error "Unsupported OS"
+    mdf ">>> Unsupported OS"
     exit $EXIT_ILLEGAL_STATE
 fi

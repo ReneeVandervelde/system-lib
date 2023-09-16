@@ -1,5 +1,27 @@
 #!/usr/bin/env bash
 
+
+function __usage {
+    echo "USAGE: mdf [MARKDOWN]"
+    echo ""
+    echo "MARKDOWN:"
+    echo "    Formatted markdown-like string, specialized for CLI outputs."
+    echo ""
+    echo "Supported Formatting:"
+    __format_line "# Header Level 1"
+    __format_line "## Header Level 2"
+    __format_line "### Header Level 3"
+    __format_line "*italic*"
+    __format_line "**bold**"
+    __format_line "_underline_"
+    __format_line "~strikethrough~"
+    __format_line "> Message"
+    __format_line ">> Warning"
+    __format_line ">>> Error"
+    __format_line "+ Positive"
+    __format_line "++ Success"
+}
+
 ESC=$(printf '\033')
 BOLD="$ESC[1m"
 ITALIC="$ESC[3m"
@@ -23,24 +45,40 @@ BOLD_MAGENTA="$ESC[01;35m"
 
 CLEAR="$ESC[0m"
 
-OUT="$@"
+function __format_line {
+    OUT="$@"
 
-# Headings:
-OUT=$(echo "$OUT" | sed -r "s/^(# .*)$/$BOLD\1$CLEAR/g")
-OUT=$(echo "$OUT" | sed -r "s/^(## .*)$/$BOLD_BLUE\1$CLEAR/g")
-OUT=$(echo "$OUT" | sed -r "s/^(### .*)$/$BLUE\1$CLEAR/g")
+    # Headings:
+    OUT=$(echo "$OUT" | sed -r "s/^(# .*)$/$BOLD\1$CLEAR/g")
+    OUT=$(echo "$OUT" | sed -r "s/^(## .*)$/$BOLD_BLUE\1$CLEAR/g")
+    OUT=$(echo "$OUT" | sed -r "s/^(### .*)$/$BLUE\1$CLEAR/g")
 
-# Inline styles
-OUT=$(echo "$OUT" | sed -r "s/(\*\*.+?\*\*)/$BOLD\1$CLEAR/g")
-OUT=$(echo "$OUT" | sed -r "s/(^|[^*])(\*[^*]+\*)($|[^*])/\1$ITALIC\2$CLEAR\3/g")
-OUT=$(echo "$OUT" | sed -r "s/(_.+?_)/$UNDERLINE\1$CLEAR/g")
-OUT=$(echo "$OUT" | sed -r "s/(~.+?~)/$STRIKE\1$CLEAR/g")
+    # Inline styles
+    OUT=$(echo "$OUT" | sed -r "s/(\*\*.+?\*\*)/$BOLD\1$CLEAR/g")
+    OUT=$(echo "$OUT" | sed -r "s/(^|[^*])(\*[^*]+\*)($|[^*])/\1$ITALIC\2$CLEAR\3/g")
+    OUT=$(echo "$OUT" | sed -r "s/(_.+?_)/$UNDERLINE\1$CLEAR/g")
+    OUT=$(echo "$OUT" | sed -r "s/(~.+?~)/$STRIKE\1$CLEAR/g")
 
-# Custom formatting
-OUT=$(echo "$OUT" | sed -r "s/^(> .*)$/$MAGENTA\1$CLEAR/g")
-OUT=$(echo "$OUT" | sed -r "s/^(>> .*)$/$BOLD_YELLOW\1$CLEAR/g")
-OUT=$(echo "$OUT" | sed -r "s/^(>>> .*)$/$BOLD_RED\1$CLEAR/g")
-OUT=$(echo "$OUT" | sed -r "s/^(\+ .*)$/$GREEN\1$CLEAR/g")
-OUT=$(echo "$OUT" | sed -r "s/^(\+\+ .*)$/$BOLD_GREEN\1$CLEAR/g")
+    # Custom formatting
+    OUT=$(echo "$OUT" | sed -r "s/^(> .*)$/$MAGENTA\1$CLEAR/g")
+    OUT=$(echo "$OUT" | sed -r "s/^(>> .*)$/$BOLD_YELLOW\1$CLEAR/g")
+    OUT=$(echo "$OUT" | sed -r "s/^(>>> .*)$/$BOLD_RED\1$CLEAR/g")
+    OUT=$(echo "$OUT" | sed -r "s/^(\+ .*)$/$GREEN\1$CLEAR/g")
+    OUT=$(echo "$OUT" | sed -r "s/^(\+\+ .*)$/$BOLD_GREEN\1$CLEAR/g")
 
-echo "$OUT"
+    echo "$OUT"
+}
+
+if [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
+    __usage
+elif [ $# -gt 0 ]; then
+    __format_line $@
+else
+    if [ -p /dev/stdin ]; then
+        while IFS= read -r line; do
+            __format_line "$line"
+        done
+    else
+        __usage
+    fi
+fi
