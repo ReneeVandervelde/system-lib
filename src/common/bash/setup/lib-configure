@@ -78,7 +78,7 @@ case "$command" in
     "status")
         __status $@
     ;;
-    "configure")
+    "configure"|"install")
         __configure $@
         ;;
     *)
