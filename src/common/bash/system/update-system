@@ -14,7 +14,7 @@ fi
 
 if assert-system has-command rpm-ostree; then
     mdf "## Installing ostree updates"
-    sudo rpm-ostree upgrade || $EXIT_UNEXPECTED
+    sudo rpm-ostree upgrade || exit $EXIT_UNEXPECTED
 fi
 
 if assert-system has-command brew; then
@@ -46,7 +46,16 @@ fi' \;
 
 mdf "## Updating Libs"
 cd $LIB_HOME
-    git pull --ff-only --verify-signatures https://github.com/ReneeVandervelde/system-lib.git master
+    if git diff HEAD --quiet; then
+        git pull --ff-only --verify-signatures https://github.com/ReneeVandervelde/system-lib.git master || exit $EXIT_UNEXPECTED
+    else
+        mdf "> Stashing changes before pull"
+        git stash save "Stashing for update-system pull"
+        git pull --ff-only --verify-signatures https://github.com/ReneeVandervelde/system-lib.git master || exit $EXIT_UNEXPECTED
+        mdf "> Applying stashed changes"
+        git stash apply || exit $EXIT_UNEXPECTED
+        git stash drop || exit $EXIT_UNEXPECTED
+    fi
 cd -
 
 mdf "++ All Updates Complete"
