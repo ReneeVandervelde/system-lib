@@ -29,7 +29,7 @@ if [ "$DM" == "" ]; then
     compose error "DM argument required"
     exit $EXIT_ILLEGAL_ARG;
 fi
-cryptsetup luksOpen $DRIVE $DM
+sudo cryptsetup luksOpen $DRIVE $DM
 
 # Format the encrypted partition via diskmapper
 sudo mkfs.ext4 /dev/mapper/$DM
