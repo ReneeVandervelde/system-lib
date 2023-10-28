@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+KOTLIN_VERSION=$1
+shift
+KOTLIN_HOME=$HOME/.kotlin/$KOTLIN_VERSION
+KOTLIN_BIN=$KOTLIN_HOME/kotlinc/bin/kotlin
+
+if [ ! -f $KOTLIN_BIN ]; then
+    mdf "> Downloading Kotlin $KOTLIN_VERSION"
+    wget https://github.com/JetBrains/kotlin/releases/download/v$KOTLIN_VERSION/kotlin-compiler-$KOTLIN_VERSION.zip -P $TEMP_HOME
+    mkdir -p $KOTLIN_HOME
+    unzip "$TEMP_HOME/kotlin-compiler-$KOTLIN_VERSION.zip" -d "$KOTLIN_HOME"
+fi
+
+SCRIPT_ORIGIN=$1
+shift
+SCRIPT_TEMP_HOME=$TEMP_HOME/kotlin-runner
+mkdir -p $SCRIPT_TEMP_HOME
+SCRIPT_TEMP=$SCRIPT_TEMP_HOME/$(sha1sum "$SCRIPT_ORIGIN" | awk '{print $1}').kts
+
+cp $SCRIPT_ORIGIN $SCRIPT_TEMP
+$KOTLIN_BIN $SCRIPT_TEMP $@

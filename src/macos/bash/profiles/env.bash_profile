@@ -5,3 +5,4 @@ export LIB_HOME=~/Lib
 export SECURE_HOME=~/Secure
 export GPG_TTY=$(tty);
 export SSH_AUTH_SOCK="~/.ssh/agent"
+export TEMP_HOME=/tmp
