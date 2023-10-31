@@ -7,11 +7,20 @@ function __full_status {
     local commands=$(compgen -c | grep "^$prefix-" | sort | uniq)
 
     for command in $commands; do
-        $command >/dev/null 2>&1
+        $command status >/dev/null 2>&1
         local status=$?
 
-        mdf "## "$(echo "$command" | sed "s/^$prefix-//")
-        __show_status $command
+        case "$status" in
+            0)
+                mdf "[+] $command"
+                ;;
+            2)
+                mdf "[ ] $command"
+                ;;
+            *)
+                mdf "[?] $command"
+                ;;
+        esac
     done
 
 }

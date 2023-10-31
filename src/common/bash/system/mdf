@@ -20,6 +20,10 @@ function __usage {
     __format_line ">>> Error"
     __format_line "+ Positive"
     __format_line "++ Success"
+    __format_line "[+] Positive Checkbox"
+    __format_line "[#] Unavailable Checkbox"
+    __format_line "[?] Unknown Checkbox"
+    __format_line "[-] Negative Checkbox"
 }
 
 ESC=$(printf '\033')
@@ -43,6 +47,8 @@ BOLD_GREEN="$ESC[01;32m"
 MAGENTA="$ESC[0;35m"
 BOLD_MAGENTA="$ESC[01;35m"
 
+GRAY="$ESC[0;90m"
+
 CLEAR="$ESC[0m"
 
 function __format_line {
@@ -65,6 +71,10 @@ function __format_line {
     OUT=$(echo "$OUT" | sed -r "s/^(>>> .*)$/$BOLD_RED\1$CLEAR/g")
     OUT=$(echo "$OUT" | sed -r "s/^(\+ .*)$/$GREEN\1$CLEAR/g")
     OUT=$(echo "$OUT" | sed -r "s/^(\+\+ .*)$/$BOLD_GREEN\1$CLEAR/g")
+    OUT=$(echo "$OUT" | sed -r "s/^\[\+\] /[$BOLD_GREEN+$CLEAR] /g")
+    OUT=$(echo "$OUT" | sed -r "s/^\[\-\] /[$BOLD_RED-$CLEAR] /g")
+    OUT=$(echo "$OUT" | sed -r "s/^\[\?\] /[$BOLD_YELLOW?$CLEAR] /g")
+    OUT=$(echo "$OUT" | sed -r "s/^\[\#\] /[$GRAY#$CLEAR] /g")
 
     echo "$OUT"
 }
