@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+
+function __status {
+    systemctl --user is-enabled usbguard-monitor.service >/dev/null 2>&1 || exit 2
+}
+
+function __configure {
+    mdf "> Copying service file"
+    cp $LIB_SRC_ROOT/rhel/resources/usbguard-monitor.service $HOME/.config/systemd/user/
+    mdf "> Enabling Service"
+    systemctl --user enable usbguard-monitor.service || exit $EXIT_UNEXPECTED
+
+    mdf "+ Configured"
+}
+
+command=$1;
+shift
+
+case $command in
+    "status")
+        __status $@
+    ;;
+    "configure")
+        __configure $@
+    ;;
+    *)
+        exit $EXIT_ILLEGAL_ARG
+    ;;
+esac
