@@ -9,16 +9,17 @@ function __full_status {
     for command in $commands; do
         $command status >/dev/null 2>&1
         local status=$?
+        local command_name=${command#"$prefix-"}
 
         case "$status" in
             0)
-                mdf "[+] $command"
+                mdf "[+] $command_name"
                 ;;
             2)
-                mdf "[ ] $command"
+                mdf "[ ] $command_name"
                 ;;
             *)
-                mdf "[?] $command"
+                mdf "[?] $command_name"
                 ;;
         esac
     done
