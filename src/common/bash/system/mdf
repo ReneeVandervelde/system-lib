@@ -54,27 +54,22 @@ CLEAR="$ESC[0m"
 function __format_line {
     OUT="$@"
 
-    # Headings:
-    OUT=$(echo "$OUT" | sed -r "s/^(# .*)$/$BOLD\1$CLEAR/g")
-    OUT=$(echo "$OUT" | sed -r "s/^(## .*)$/$BOLD_BLUE\1$CLEAR/g")
-    OUT=$(echo "$OUT" | sed -r "s/^(### .*)$/$BLUE\1$CLEAR/g")
-
-    # Inline styles
-    OUT=$(echo "$OUT" | sed -r "s/(\*\*.+?\*\*)/$BOLD\1$CLEAR/g")
-    OUT=$(echo "$OUT" | sed -r "s/(^|[^*])(\*[^*]+\*)($|[^*])/\1$ITALIC\2$CLEAR\3/g")
-    OUT=$(echo "$OUT" | sed -r "s/(_.+?_)/$UNDERLINE\1$CLEAR/g")
-    OUT=$(echo "$OUT" | sed -r "s/(~.+?~)/$STRIKE\1$CLEAR/g")
-
-    # Custom formatting
-    OUT=$(echo "$OUT" | sed -r "s/^(> .*)$/$MAGENTA\1$CLEAR/g")
-    OUT=$(echo "$OUT" | sed -r "s/^(>> .*)$/$BOLD_YELLOW\1$CLEAR/g")
-    OUT=$(echo "$OUT" | sed -r "s/^(>>> .*)$/$BOLD_RED\1$CLEAR/g")
-    OUT=$(echo "$OUT" | sed -r "s/^(\+ .*)$/$GREEN\1$CLEAR/g")
-    OUT=$(echo "$OUT" | sed -r "s/^(\+\+ .*)$/$BOLD_GREEN\1$CLEAR/g")
-    OUT=$(echo "$OUT" | sed -r "s/^\[\+\] /[$BOLD_GREEN+$CLEAR] /g")
-    OUT=$(echo "$OUT" | sed -r "s/^\[\-\] /[$BOLD_RED-$CLEAR] /g")
-    OUT=$(echo "$OUT" | sed -r "s/^\[\?\] /[$BOLD_YELLOW?$CLEAR] /g")
-    OUT=$(echo "$OUT" | sed -r "s/^\[\#\] /[$GRAY#$CLEAR] /g")
+    OUT=$(echo "$OUT" | sed -r -e "s/^(# .*)$/$BOLD\1$CLEAR/g" \
+        -e "s/^(## .*)$/$BOLD_BLUE\1$CLEAR/g" \
+        -e "s/^(### .*)$/$BLUE\1$CLEAR/g" \
+        -e "s/(\*\*.+?\*\*)/$BOLD\1$CLEAR/g" \
+        -e "s/(^|[^*])(\*[^*]+\*)($|[^*])/\1$ITALIC\2$CLEAR\3/g" \
+        -e "s/(_.+?_)/$UNDERLINE\1$CLEAR/g" \
+        -e "s/(~.+?~)/$STRIKE\1$CLEAR/g" \
+        -e "s/^(> .*)$/$MAGENTA\1$CLEAR/g" \
+        -e "s/^(>> .*)$/$BOLD_YELLOW\1$CLEAR/g" \
+        -e "s/^(>>> .*)$/$BOLD_RED\1$CLEAR/g" \
+        -e "s/^(\+ .*)$/$GREEN\1$CLEAR/g" \
+        -e "s/^(\+\+ .*)$/$BOLD_GREEN\1$CLEAR/g" \
+        -e "s/^\[\+\] /[$BOLD_GREEN+$CLEAR] /g" \
+        -e "s/^\[\-\] /[$BOLD_RED-$CLEAR] /g" \
+        -e "s/^\[\?\] /[$BOLD_YELLOW?$CLEAR] /g" \
+        -e "s/^\[\#\] /[$GRAY#$CLEAR] /g")
 
     echo "$OUT"
 }
