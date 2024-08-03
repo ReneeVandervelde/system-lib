@@ -1,4 +1,4 @@
 ##
 # RHEL Alaises
 ##
-alias pidcat=~/Lib/pidcat/pidcat.py
+alias pidcat=$BIN_HOME/pidcat.py
