@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+REMOTE=$1
+BRANCH=$2
+
+if [[ "$REMOTE" == "" ]] || [[ "$BRANCH" == "" ]]; then
+    mdf ">>> Usage: git-start-from REMOTE BRANCH"
+    exit $EXIT_ILLEGAL_ARG
+fi
+
+git checkout $BRANCH || exit $EXIT_UNEXPECTED
+git pull --ff-only --verify-signatures $REMOTE $BRANCH || exit $EXIT_UNEXPECTED
+git branch-purge || exit $EXIT_UNEXPECTED
