@@ -9,5 +9,5 @@ if [[ "$REMOTE" == "" ]] || [[ "$BRANCH" == "" ]]; then
 fi
 
 git checkout $BRANCH || exit $EXIT_UNEXPECTED
-git pull --ff-only --verify-signatures $REMOTE $BRANCH || exit $EXIT_UNEXPECTED
+git safe-pull $REMOTE $BRANCH || exit $EXIT_UNEXPECTED
 git branch-purge || exit $EXIT_UNEXPECTED
